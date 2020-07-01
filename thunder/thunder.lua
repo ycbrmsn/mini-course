@@ -113,7 +113,7 @@ end
 -- timerid, timername
 local minitimerChange = function (event)
   thunder:check(function ()
-    -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
+    -- 计时器池中的计时器倒计时为0时，降下天雷，或者销毁天雷区域
     local result, second = MiniTimer:getTimerTime(event.timerid)
     if (second == 0) then -- 倒计时为0
       local timerInfo = thunder.timerPool[event.timerid]

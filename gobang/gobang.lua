@@ -1,14 +1,20 @@
--- 五子棋
+-- 五子棋v1.0  createBy 莫小仙
+-- 手持特定物品（默认是能量剑），点击地面，会在地面上生成棋盘。请找一个空旷的地方，因为棋盘也许会破坏地形。
 gobang = {
   particleIds = { 1267, 1190 }, -- 落子位置、胜利连子
   size = 15,
-  --          棋盘、黑子、白子、关闭、确定、重置、 单黑、单白、双黑、双白、悔棋
-  itemids = { 966, 260, 261, 416, 406, 405, 682, 667, 615, 600, 504 }, 
+  --          手持物、棋盘、黑子、白子、关闭、确定、重置、 单黑、单白、双黑、双白、悔棋
+  itemids = { 12005, 966, 260, 261, 416, 406, 405, 682, 667, 615, 600, 504 },
+  scoreMap = {
+    [0] = 0, [-10] = 0, [10] = 0, [-20] = 0, [20] = 0, [-30] = 0, [30] = 0,
+    [2] = 5, [-12] = 35, [12] = 40, [-22] = 195, [22] = 200, [-32] = 995, [32] = 1000, 
+    [1] = 1, [-11] = 19, [11] = 20, [-21] = 35, [21] = 40, [-31] = 195, [31] = 200
+  },
   gameInfos = {} -- { objid -> {} }
 }
 
 function gobang:init (pos, objid)
-  Block:placeBlock(gobang.itemids[4], pos.x, pos.y, pos.z) -- 关闭项
+  Block:placeBlock(gobang.itemids[5], pos.x, pos.y, pos.z) -- 关闭项
   local result, dirx, diry, dirz = Actor:getFaceDirection(objid)
   local xt, zt = 1, 1
   if (dirx < 0) then
@@ -17,22 +23,22 @@ function gobang:init (pos, objid)
   if (dirz < 0) then
     zt = -1
   end
-  local surePos = { x = pos.x + (xt * 2), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[5], surePos.x, surePos.y, surePos.z) -- 确定项
-  local resetPos = { x = pos.x + (xt * 3), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[6], resetPos.x, resetPos.y, resetPos.z) -- 重置项
+  local surePos = { x = pos.x + (xt * 3), y = pos.y, z = pos.z }
+  Block:placeBlock(gobang.itemids[6], surePos.x, surePos.y, surePos.z) -- 确定项
+  local resetPos = { x = pos.x + (xt * 2), y = pos.y, z = pos.z }
+  Block:placeBlock(gobang.itemids[7], resetPos.x, resetPos.y, resetPos.z) -- 重置项
 
   local singleBlackPos = { x = pos.x + (xt * 5), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[7], singleBlackPos.x, singleBlackPos.y, singleBlackPos.z) -- 单黑项
+  Block:placeBlock(gobang.itemids[8], singleBlackPos.x, singleBlackPos.y, singleBlackPos.z) -- 单黑项
   local singleWhitePos = { x = pos.x + (xt * 6), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[8], singleWhitePos.x, singleWhitePos.y, singleWhitePos.z) -- 单白项
+  Block:placeBlock(gobang.itemids[9], singleWhitePos.x, singleWhitePos.y, singleWhitePos.z) -- 单白项
 
   local doubleBlackPos = { x = pos.x + (xt * 9), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[9], doubleBlackPos.x, doubleBlackPos.y, doubleBlackPos.z) -- 双人黑项
+  Block:placeBlock(gobang.itemids[10], doubleBlackPos.x, doubleBlackPos.y, doubleBlackPos.z) -- 双人黑项
   local doubleWhitePos = { x = pos.x + (xt * 10), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[10], doubleWhitePos.x, doubleWhitePos.y, doubleWhitePos.z) -- 双人白项
+  Block:placeBlock(gobang.itemids[11], doubleWhitePos.x, doubleWhitePos.y, doubleWhitePos.z) -- 双人白项
   local undoPos = { x = pos.x + (xt * 12), y = pos.y, z = pos.z }
-  Block:placeBlock(gobang.itemids[11], undoPos.x, undoPos.y, undoPos.z) -- 悔棋项
+  Block:placeBlock(gobang.itemids[12], undoPos.x, undoPos.y, undoPos.z) -- 悔棋项
 
   -- 棋盘
   local positions = {} -- { x,z -> { pos, color } }
@@ -40,7 +46,7 @@ function gobang:init (pos, objid)
     for j = 1, gobang.size do
       local p = { x = pos.x + (xt * i), y = pos.y, z = pos.z + (zt * j) }
       positions[gobang:getPosInfoKey(p)] = { p, 0 }
-      Block:placeBlock(gobang.itemids[1], p.x, p.y, p.z, FACE_DIRECTION.DIR_POS_Y)
+      Block:placeBlock(gobang.itemids[2], p.x, p.y, p.z, FACE_DIRECTION.DIR_POS_Y)
     end
   end
   gobang.gameInfos[objid] = { objid = objid, positions = positions, closePos = pos, surePos = surePos, 
@@ -120,9 +126,9 @@ function gobang:nextTurn (info, isFirstTurn)
     for i, v in ipairs(info.players) do
       if (v == -1) then -- 电脑
       elseif (v == info.playerid) then
-        Chat:sendSystemMsg('到你的回合了', info.playerid)
+        Chat:sendSystemMsg('到你的回合了', v)
       else
-        Chat:sendSystemMsg('正在等待对手落子', info.playerid)
+        Chat:sendSystemMsg('正在等待对手落子', v)
       end
     end
   end
@@ -135,7 +141,15 @@ function gobang:finishGame (info, playerid)
     for i, v in ipairs(info.players) do
       gobang:showMessage('游戏中止', v)
     end
-  else
+  elseif (playerid == -66) then -- 平局
+    for i, v in ipairs(info.players) do
+      if (v == playerid) then
+        gobang:showMessage('平局结束', v)
+      else
+        gobang:showMessage('平局结束', v)
+      end
+    end
+  else -- 一方胜利
     for i, v in ipairs(info.winPositions) do
       World:playParticalEffect(v.x, v.y + 2, v.z, gobang.particleIds[2], 1)
     end
@@ -178,25 +192,27 @@ end
 function gobang:computerPlay (info)
   local posInfo = gobang:getGreatPosition(info)
   gobang:placePiece(info, posInfo)
-  if (not(gobang:isWin(info, posInfo[1]))) then
+  if (not(gobang:isWin(info, posInfo[1])) and not(gobang:isTie(info))) then
     gobang:nextTurn(info)
   end
 end
 
 -- 获得一个最好的位置
 function gobang:getGreatPosition (info)
-  local posInfo = { -1, -1 }
+  local maxScore = -1
+  local greatScorePositions
   for k, v in pairs(info.positions) do
     if (v[2] == 0) then -- 无子
       local score = gobang:calcScore(info, v[1])
-      if (score > posInfo[1]) then
-        print(score, v[1].x, v[1].z)
-        posInfo[1] = score
-        posInfo[2] = v
+      if (score > maxScore) then
+        greatScorePositions = { v }
+        maxScore = score
+      elseif (score == maxScore) then
+        table.insert(greatScorePositions, v)
       end
     end
   end
-  return posInfo[2]
+  return greatScorePositions[math.random(1, #greatScorePositions)]
 end
 
 -- 获得此位置的博弈分
@@ -228,12 +244,12 @@ function gobang:getNum (info, pos, lastColor, vec2, isFirst)
   if (not(posInfo)) then -- 已是边界
     return 0
   elseif (posInfo[2] == 0) then -- 空
-    return 0.1
+    return 1
   elseif (posInfo[2] == lastColor) then -- 颜色相同
-    return gobang:getNum(info, p, posInfo[2], vec2) + 1
+    return gobang:getNum(info, p, posInfo[2], vec2) + 10
   else -- 颜色不同
     if (isFirst) then
-      return (gobang:getNum(info, p, posInfo[2], vec2) + 1) * -1
+      return (gobang:getNum(info, p, posInfo[2], vec2) + 10) * -1
     else
       return 0
     end
@@ -248,33 +264,43 @@ function gobang:calcScoreOneLine (num1, num2)
   elseif (num1 == 0) then -- 一边是边界
     local na2 = math.abs(num2)
     if (na2 == math.floor(na2)) then -- 被堵住了
-      if (na2 < 4) then -- 小于4时无法连成5子，简单定为0分
+      if (na2 < 40) then -- 小于4时无法连成5子，简单定为0分
         num = 0
       else
-        num = na2
+        num = num2
       end
     else -- 没有堵住，简单定为长度
-      num = na2
+      num = num2
     end
   elseif (num2 == 0) then -- 一边是边界
     local na1 = math.abs(num1)
     if (na1 == math.floor(na1)) then -- 被堵住了
-      if (na1 < 4) then -- 小于4时无法连成5子，简单定为0分
+      if (na1 < 40) then -- 小于4时无法连成5子，简单定为0分
         num = 0
       else
-        num = na1
+        num = num1
       end
     else -- 没有堵住，简单定为长度
-      num = na1
+      num = num1
     end
   elseif (num1 * num2 > 0) then -- 双通
     num = num1 + num2
-  elseif (math.abs(num1) == 0.1 or math.abs(num2) == 0.1) then -- 双通
-    num = math.abs(num1) + math.abs(num2)
+  elseif (num1 == 1) then -- 双通
+    if (num2 > 0) then
+      num = num1 + num2
+    else
+      num = -num1 + num2
+    end
+  elseif (num2 == 1) then -- 双通
+    if (num1 > 0) then
+      num = num1 + num2
+    else
+      num = num1 - num2
+    end
   else -- 异号
     local na1, na2 = math.abs(num1), math.abs(num2)
     if (na1 == math.floor(na1)) then -- 被堵住了
-      if (na1 < 4) then -- 小于4时无法连成5子，简单定为0分
+      if (na1 < 40) then -- 小于4时无法连成5子，简单定为0分
         num = 0
       else
         num = 100
@@ -284,7 +310,7 @@ function gobang:calcScoreOneLine (num1, num2)
     end
     local temp
     if (na2 == math.floor(na2)) then -- 被堵住了
-      if (na2 < 4) then -- 小于4时无法连成5子，简单定为0分
+      if (na2 < 40) then -- 小于4时无法连成5子，简单定为0分
         temp = 0
       else
         temp = 100
@@ -293,42 +319,43 @@ function gobang:calcScoreOneLine (num1, num2)
       temp = na2
     end
     if (num < temp) then
-      num = temp
+      num = num2
+    elseif (num > temp) then
+      num = num1
+    else
+      if (num1 > num2) then
+        num = num1
+      else
+        num = num2
+      end
     end
+  end
+  if (not(num)) then
+    print(num1, num2)
   end
   return gobang:getScore(num)
 end
 
 function gobang:getScore (num)
-  num = math.abs(num)
   local score = 0
-  if (num == 0.2) then -- 双通
-    score = 10
-  elseif (num == 1.2) then
-    score = 20
-  elseif (num == 2.2) then
-    score = 50
-  elseif (num == 3.2) then
-    score = 200
-  elseif (num >= 4) then
-    score = 500
-  elseif (num == 0 or num == 1 or num == 2 or num == 3) then -- 两边都堵上
-    score = 0
-  elseif (num == 0.1) then -- 一边堵上
-    score = 1
-  elseif (num == 1.1) then
-    score = 10
-  elseif (num == 2.1) then
-    score = 20
-  elseif (num == 3.1) then
-    score = 50
+  if (num <= -40) then
+    score = 4995
+  elseif (num >= 40) then
+    score = 5000
+  else
+    score = gobang.scoreMap[num]
+  end
+  if (not(score)) then
+    print('nil:', num, type(num), num == -12, math.abs(num) == 12)
+    print(gobang.scoreMap[12], gobang.scoreMap[-12], gobang.scoreMap[math.abs(num)])
+    print(gobang.scoreMap[num])
   end
   return score
 end
 
 function gobang:placePiece (info, posInfo)
   posInfo[2] = info.thisTurn
-  Block:placeBlock(gobang.itemids[posInfo[2] + 1], posInfo[1].x, posInfo[1].y + 1, 
+  Block:placeBlock(gobang.itemids[posInfo[2] + 2], posInfo[1].x, posInfo[1].y + 1, 
     posInfo[1].z, FACE_DIRECTION.DIR_POS_Y)
   World:playParticalEffect(posInfo[1].x, posInfo[1].y + 1, posInfo[1].z, gobang.particleIds[1], 1)
   if (#info.lastPosition > 0) then
@@ -396,139 +423,184 @@ function gobang:countHalfLine (info, pos, vec2)
   end
 end
 
+-- 是否平局
+function gobang:isTie (info)
+  local hasEmptyPosition = false
+  for k, v in pairs(info.positions) do
+    if (v[2] == 0) then
+      hasEmptyPosition = true
+      break
+    end
+  end
+  if (not(hasEmptyPosition)) then -- 没有空位了
+    gobang:finishGame(info, -66)
+    return true
+  else
+    return false
+  end
+end
+
+-- 点击相关位置
+function gobang:click (info, objid, pos)
+  if (gobang:equals(pos, info.closePos)) then -- 关闭
+    if (objid == info.objid) then
+      gobang:clear(objid)
+      gobang.gameInfos[objid] = nil
+      Chat:sendSystemMsg('你收回了棋盘', objid)
+    else
+      Chat:sendSystemMsg('这不是你放置的棋盘，无法收回', objid)
+    end
+  elseif (gobang:equals(pos, info.surePos)) then -- 确定
+    if (info.isGameStart) then
+      Chat:sendSystemMsg('游戏尚未结束，无法确定', objid)
+      return
+    end
+    if (info.isSingle) then -- 单人模式
+      if (info.singleBlack) then -- 黑子
+        info.players = { objid, -1 }
+      else
+        info.players = { -1, objid }
+      end
+      gobang:startGame(info)
+    elseif (info.isDouble) then -- 双人模式
+      if (not(info.doubleBlack)) then
+        Chat:sendSystemMsg('双人黑子（先手）无人选择', objid)
+      elseif (not(info.doubleWhite)) then
+        Chat:sendSystemMsg('双人白子（后手）无人选择', objid)
+      else
+        info.players = { info.doubleBlack, info.doubleWhite }
+        gobang:startGame(info)
+      end
+    else -- 未选择
+      Chat:sendSystemMsg('请先选择黑白子后再进行确定', objid)
+    end
+  elseif (gobang:equals(pos, info.resetPos)) then -- 重置
+    if (info.isGameStart) then
+      Chat:sendSystemMsg('游戏尚未结束，重置无效', objid)
+      return
+    end
+    info.isSingle = false
+    info.isDouble = false
+    info.doubleBlack = nil
+    info.doubleWhite = nil
+    Chat:sendSystemMsg('重置', objid)
+  elseif (gobang:equals(pos, info.singleBlackPos)) then -- 单黑
+    if (info.isGameStart) then
+      Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
+      return
+    end
+    info.isSingle = true
+    info.isDouble = false
+    info.singleBlack = true
+    Chat:sendSystemMsg('你选择了单人黑子（先手）', objid)
+  elseif (gobang:equals(pos, info.singleWhitePos)) then -- 单白
+    if (info.isGameStart) then
+      Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
+      return
+    end
+    info.isSingle = true
+    info.isDouble = false
+    info.singleBlack = false
+    Chat:sendSystemMsg('你选择了单人白子（后手）', objid)
+  elseif (gobang:equals(pos, info.doubleBlackPos)) then -- 双黑
+    if (info.isGameStart) then
+      Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
+      return
+    end
+    info.isSingle = false
+    info.isDouble = true
+    info.doubleBlack = objid
+    if (info.doubleWhite == objid) then
+      info.doubleWhite = nil
+    end
+    Chat:sendSystemMsg('你选择了双人黑子（先手）', objid)
+  elseif (gobang:equals(pos, info.doubleWhitePos)) then -- 双白
+    if (info.isGameStart) then
+      Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
+      return
+    end
+    info.isSingle = false
+    info.isDouble = true
+    info.doubleWhite = objid
+    if (info.doubleBlack == objid) then
+      info.doubleBlack = nil
+    end
+    Chat:sendSystemMsg('你选择了双人白子（后手）', objid)
+  elseif (gobang:equals(pos, info.undoPos)) then -- 悔棋
+    if (not(info.isGameStart)) then
+      Chat:sendSystemMsg('游戏尚未开始，无法悔棋', objid)
+      return
+    elseif (objid ~= info.playerid) then
+      Chat:sendSystemMsg('当前不是你的回合，无法悔棋', objid)
+      return
+    end
+    if (info.isSingle) then -- 单人模式
+      if (#info.lastPosition < 3) then
+        if (info.isUndo) then
+          Chat:sendSystemMsg('无法连续悔棋', objid)
+        else
+          Chat:sendSystemMsg('当前无法悔棋', objid)
+        end
+      else
+        info.isUndo = true
+        local pInfo = info.lastPosition[#info.lastPosition]
+        pInfo[2] = 0
+        World:stopEffectOnPosition(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z, gobang.particleIds[1])
+        Block:destroyBlock(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z) -- 删除一个棋子
+        table.remove(info.lastPosition)
+        pInfo = info.lastPosition[#info.lastPosition]
+        pInfo[2] = 0
+        Block:destroyBlock(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z) -- 删除一个棋子
+        table.remove(info.lastPosition)
+        pInfo = info.lastPosition[#info.lastPosition]
+        World:playParticalEffect(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z, gobang.particleIds[1], 1)
+      end
+    else -- 双人模式
+      Chat:sendSystemMsg('双人模式下无法悔棋', objid)
+    end
+  else
+    local posInfo = info.positions[gobang:getPosInfoKey(pos)]
+    if (posInfo) then -- 棋盘
+      if (not(info.isGameStart)) then -- 游戏未开始
+        Chat:sendSystemMsg('游戏尚未开始', objid)
+      elseif (info.playerid == objid) then -- 玩家的回合
+        if (posInfo[2] == 0) then -- 可下
+          gobang:placePiece(info, posInfo)
+          if (not(gobang:isWin(info, posInfo[1])) and not(gobang:isTie(info))) then
+            gobang:nextTurn(info)
+          end
+        else -- 不可下
+          Chat:sendSystemMsg('此处已有棋子', objid)
+        end
+      else
+        Chat:sendSystemMsg('当前不是你的回合', objid)
+      end
+    else
+      return false
+    end
+  end
+  return true
+end
+
 -- eventobjid, blockid, x, y, z
 local playerClickBlock = function (event)
   gobang:check (function ()
     local x, y, z = math.floor(event.x) + 0.5, math.floor(event.y) + 0.5, math.floor(event.z) + 0.5
     local objid = event.eventobjid
     local pos = { x = x, y = y, z = z }
-    local info = gobang.gameInfos[objid]
-    if (info) then
-      if (gobang:equals(pos, info.closePos)) then -- 关闭
-        gobang:clear(objid)
-        gobang.gameInfos[objid] = nil
-        Chat:sendSystemMsg('你收回了棋盘', objid)
-      elseif (gobang:equals(pos, info.surePos)) then -- 确定
-        if (info.isGameStart) then
-          Chat:sendSystemMsg('游戏尚未结束，无法确定', objid)
-          return
-        end
-        if (info.isSingle) then -- 单人模式
-          if (info.singleBlack) then -- 黑子
-            info.players = { objid, -1 }
-          else
-            info.players = { -1, objid }
-          end
-          gobang:startGame(info)
-        elseif (info.isDouble) then -- 双人模式
-          if (not(info.doubleBlack)) then
-            Chat:sendSystemMsg('双人黑子（先手）无人选择', objid)
-          elseif (not(info.doubleWhite)) then
-            Chat:sendSystemMsg('双人白子（后手）无人选择', objid)
-          else
-            info.players = { info.doubleBlack, info.doubleWhite }
-            gobang:startGame(info)
-          end
-        else -- 多人模式未完成
-          Chat:sendSystemMsg('请先选择黑白子后再进行确定', objid)
-        end
-      elseif (gobang:equals(pos, info.resetPos)) then -- 重置
-        info.isSingle = false
-        info.isDouble = false
-        Chat:sendSystemMsg('重置', objid)
-      elseif (gobang:equals(pos, info.singleBlackPos)) then -- 单黑
-        if (info.isGameStart) then
-          Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
-          return
-        end
-        info.isSingle = true
-        info.isDouble = false
-        info.singleBlack = true
-        Chat:sendSystemMsg('你选择了单人黑子（先手）', objid)
-      elseif (gobang:equals(pos, info.singleWhitePos)) then -- 单白
-        if (info.isGameStart) then
-          Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
-          return
-        end
-        info.isSingle = true
-        info.isDouble = false
-        info.singleBlack = false
-        Chat:sendSystemMsg('你选择了单人白子（后手）', objid)
-      elseif (gobang:equals(pos, info.doubleBlackPos)) then -- 双黑
-        if (info.isGameStart) then
-          Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
-          return
-        end
-        info.isSingle = false
-        info.isDouble = true
-        info.doubleBlack = objid
-        if (info.doubleWhite == objid) then
-          info.doubleWhite = nil
-        end
-        Chat:sendSystemMsg('你选择了双人黑子（先手）', objid)
-      elseif (gobang:equals(pos, info.doubleWhitePos)) then -- 双白
-        if (info.isGameStart) then
-          Chat:sendSystemMsg('游戏尚未结束，选择无效', objid)
-          return
-        end
-        info.isSingle = false
-        info.isDouble = true
-        info.doubleWhite = objid
-        if (info.doubleBlack == objid) then
-          info.doubleBlack = nil
-        end
-        Chat:sendSystemMsg('你选择了双人白子（后手）', objid)
-      elseif (gobang:equals(pos, info.undoPos)) then -- 悔棋
-        if (not(info.isGameStart)) then
-          Chat:sendSystemMsg('游戏尚未开始，无法悔棋', objid)
-          return
-        end
-        if (info.isSingle) then -- 单人模式
-          if (#info.lastPosition < 3) then
-            if (info.isUndo) then
-              Chat:sendSystemMsg('无法连续悔棋', objid)
-            else
-              Chat:sendSystemMsg('当前无法悔棋', objid)
-            end
-          else
-            info.isUndo = true
-            local pInfo = info.lastPosition[#info.lastPosition]
-            pInfo[2] = 0
-            World:stopEffectOnPosition(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z, gobang.particleIds[1])
-            Block:destroyBlock(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z) -- 删除一个棋子
-            table.remove(info.lastPosition)
-            pInfo = info.lastPosition[#info.lastPosition]
-            pInfo[2] = 0
-            Block:destroyBlock(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z) -- 删除一个棋子
-            table.remove(info.lastPosition)
-            pInfo = info.lastPosition[#info.lastPosition]
-            World:playParticalEffect(pInfo[1].x, pInfo[1].y + 1, pInfo[1].z, gobang.particleIds[1], 1)
-          end
-        else -- 双人模式
-          Chat:sendSystemMsg('双人模式下无法悔棋', objid)
-        end
-        
-      else
-        local posInfo = info.positions[gobang:getPosInfoKey(pos)]
-        if (posInfo) then -- 棋盘
-          if (not(info.isGameStart)) then -- 游戏未开始
-            Chat:sendSystemMsg('游戏尚未开始', objid)
-          elseif (info.playerid == objid) then -- 玩家的回合
-            if (posInfo[2] == 0) then -- 可下
-              gobang:placePiece(info, posInfo)
-              if (not(gobang:isWin(info, posInfo[1]))) then
-                gobang:nextTurn(info)
-              end
-            else -- 不可下
-              Chat:sendSystemMsg('此处已有棋子', objid)
-            end
-          else
-            Chat:sendSystemMsg('当前不是你的回合', objid)
-          end
-        end
+    -- 创建棋盘
+    local result, itemid = Player:getCurToolID(objid)
+    if (itemid == gobang.itemids[1]) then
+      local info = gobang.gameInfos[objid]
+      if (not(info)) then
+        gobang:init({ x = x, y = y + 1, z = z }, objid)
+        return
       end
-    else
-      gobang:init({ x = x, y = y + 1, z = z }, objid)
+    end
+    for k, v in pairs(gobang.gameInfos) do
+      if (gobang:click(v, objid, pos)) then
+        break
+      end
     end
   end)
 end

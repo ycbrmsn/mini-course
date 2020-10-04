@@ -285,7 +285,6 @@ local runGame = function ()
         TurnAreaBlockHelper.createIndex = TurnAreaBlockHelper.createIndex + endIndex + 1
       else
         TurnAreaBlockHelper.isCreating = false
-        TurnAreaBlockHelper.isWorking = false
         Chat:sendSystemMsg('翻转复制完成')
       end
     end

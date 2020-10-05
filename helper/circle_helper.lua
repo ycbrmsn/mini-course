@@ -19,6 +19,8 @@ CircleHelper = {
   category = 1, -- 类型1：水平；2前后；3左右；4球。默认水平
   categoryName = { '水平圆圈', '前后圆圈', '左右圆圈', '球形', '半球形' },
   createArr = {},
+  existMap = {},
+  factor = 0.9999, -- 系数
 }
 
 -- 校验
@@ -32,7 +34,7 @@ end
 function CircleHelper:reset ()
   self.category = self.defaultCategory
   self.radius = self.defaultRadius
-  Chat:sendSystemMsg('重置半径为' .. self.radius .. '，模式为' .. self.categoryName[self.category])
+  Chat:sendSystemMsg('重置半径为#B' .. self.radius .. '#n，模式为#B' .. self.categoryName[self.category])
 end
 
 -- 变更模式
@@ -41,7 +43,7 @@ function CircleHelper:changeModel ()
   if (self.category > 5) then
     self.category = 1
   end
-  Chat:sendSystemMsg('当前选择' .. self.categoryName[self.category] .. '模式')
+  Chat:sendSystemMsg('切换为#B' .. self.categoryName[self.category] .. '#n模式')
 end
 
 -- 改变半径
@@ -49,9 +51,9 @@ function CircleHelper:changeRadius (change)
   self.radius = self.radius + change
   if (self.radius < 1) then
     self.radius = 1
-    Chat:sendSystemMsg('半径' .. self.radius .. '已经是最小了')
+    Chat:sendSystemMsg('半径#B' .. self.radius .. '#n已经是最小了')
   else
-    Chat:sendSystemMsg('当前半径调整为' .. self.radius)
+    Chat:sendSystemMsg('当前半径调整为#B' .. self.radius)
   end
 end
 
@@ -67,6 +69,7 @@ end
 -- 计算
 function CircleHelper:calculate (objid)
   self.createArr = {}
+  self.existMap = {}
   local x, y, z = self.blockInfo.x, self.blockInfo.y, self.blockInfo.z
   if (self.category == 1) then -- 水平
     CircleHelper:insertCenterY(x, y, z, self.radius)
@@ -85,45 +88,54 @@ function CircleHelper:calculate (objid)
       CircleHelper:insertCenterZ(x, y, z, self.radius)
     end
   elseif (self.category == 4) then -- 球形
-    CircleHelper:insertTopHalfBall()
+    CircleHelper:insertBall()
   else -- 半球形
-
+    local result, dirx, diry, dirz = Actor:getFaceDirection(objid)
+    print(dirx, diry, dirz)
+    local dx, dy, dz = math.abs(dirx), math.abs(diry), math.abs(dirz)
+    if (dx >= dy and dx >= dz) then -- x
+      if (dirx > 0) then -- x+
+        CircleHelper:insertXBall(0, 90)
+      else -- x-
+        CircleHelper:insertXBall(90, 180)
+      end
+    elseif (dy >= dx and dy >= dz) then -- y
+      if (diry > 0) then
+        CircleHelper:insertYBall(0, 90)
+      else
+        CircleHelper:insertYBall(90, 180)
+      end
+    else -- z
+      if (dirz > 0) then
+        CircleHelper:insertZBall(0, 90)
+      else
+        CircleHelper:insertZBall(90, 180)
+      end
+    end
   end
-  Chat:sendSystemMsg('计算完成')
   return true
 end
 
--- 获取另一边长
-function CircleHelper:getSideArr (radius)
-  local arr = {}
-  for i = 0, radius do
-    local len = math.sqrt(math.pow(radius, 2) - math.pow(i, 2))
-    table.insert(arr, len)
-    print(len)
-  end
-  return arr
-end
-
 function CircleHelper:getAngle (radius)
-  return 90 / (radius * 2 + 1)
-end
-
-function CircleHelper:insertCenterX (x, y, z, radius)
-  local angle = CircleHelper:getAngle(radius)
-  for i = 0, 360, angle do
-    table.insert(self.createArr, { x = x, y = y - radius * CircleHelper:sin(i), z = z + radius * CircleHelper:cos(i) })
+  local angle = 90 / (radius * 2 + 1) -- 90度除以一边长
+  if (angle < 0.5) then
+    return 0.25
+  elseif (angle < 1) then
+    return 0.5
+  elseif (angle < 2) then
+    return 1
+  elseif (angle < 3) then
+    return 2
+  elseif (angle < 6) then
+    return 3
+  elseif (angle < 9) then
+    return 6
+  else
+    return 9
   end
 end
 
 -- x轴正方向起旋转
-
-function CircleHelper:insertCenterY (x, y, z, radius)
-  local angle = CircleHelper:getAngle(radius)
-  for i = 0, 360, angle do
-    table.insert(self.createArr, { x = x + radius * CircleHelper:cos(i), y = y, z = z - radius * CircleHelper:sin(i) })
-    print(self.createArr[#self.createArr].x, self.createArr[#self.createArr].z)
-  end
-end
 
 function CircleHelper:sin (angle)
   return math.sin(math.rad(angle))
@@ -133,23 +145,74 @@ function CircleHelper:cos (angle)
   return math.cos(math.rad(angle))
 end
 
-function CircleHelper:insertCenterZ (x, y, z, radius)
-  local angle = CircleHelper:getAngle(radius)
-  for i = 0, 360, angle do
-    table.insert(self.createArr, { x = x + radius * CircleHelper:cos(i), y = y - radius * CircleHelper:sin(i), z = z })
+-- 不存在才插入
+function CircleHelper:insert (arr, x, y, z)
+  -- print(x, z)
+  local nx, ny, nz = math.floor(x), math.floor(y), math.floor(z)
+  local key = nx .. ',' .. ny .. ',' .. nz
+  if (not(self.existMap[key])) then
+    table.insert(arr, { x = nx, y = ny, z = nz })
+    self.existMap[key] = true
+    -- print(nx, nz, x, z)
   end
 end
 
-function CircleHelper:insertTopHalfBall ()
- for i = 0, self.radius do
-  local radius = self.radius - i
-  if (radius > 0) then
-    print('半径：', radius)
-    Chat:sendSystemMsg('半径：' .. radius)
-    local x, y, z = self.blockInfo.x, self.blockInfo.y + i, self.blockInfo.z
+function CircleHelper:insertCenterX (x, y, z, radius)
+  radius = radius * self.factor
+  local angle = CircleHelper:getAngle(radius)
+  for i = 0, 360, angle do
+    CircleHelper:insert(self.createArr, x, y - radius * CircleHelper:sin(i), z + radius * CircleHelper:cos(i))
+  end
+end
+
+function CircleHelper:insertCenterY (x, y, z, radius)
+  radius = radius * self.factor
+  local angle = CircleHelper:getAngle(radius)
+  for i = 0, 360, angle do
+    CircleHelper:insert(self.createArr, x + radius * CircleHelper:cos(i), y, z - radius * CircleHelper:sin(i))
+  end
+end
+
+function CircleHelper:insertCenterZ (x, y, z, radius)
+  radius = radius * self.factor
+  local angle = CircleHelper:getAngle(radius)
+  for i = 0, 360, angle do
+    CircleHelper:insert(self.createArr, x + radius * CircleHelper:cos(i), y - radius * CircleHelper:sin(i), z)
+  end
+end
+
+function CircleHelper:insertBall ()
+  CircleHelper:insertYBall(0, 180)
+end
+
+function CircleHelper:insertXBall (angle1, angle2)
+  local y, z = self.blockInfo.y, self.blockInfo.z
+  local angle = CircleHelper:getAngle(self.radius)
+  for i = angle1, angle2, angle do
+    local x = self.blockInfo.x + self.radius * self.factor * CircleHelper:cos(i)
+    local radius = self.radius * CircleHelper:sin(i)
+    CircleHelper:insertCenterX(x, y, z, radius)
+  end
+end
+
+function CircleHelper:insertYBall (angle1, angle2)
+  local x, z = self.blockInfo.x, self.blockInfo.z
+  local angle = CircleHelper:getAngle(self.radius)
+  for i = angle1, angle2, angle do
+    local y = self.blockInfo.y + self.radius * self.factor * CircleHelper:cos(i)
+    local radius = self.radius * CircleHelper:sin(i)
     CircleHelper:insertCenterY(x, y, z, radius)
   end
- end
+end
+
+function CircleHelper:insertZBall (angle1, angle2)
+  local x, y = self.blockInfo.x, self.blockInfo.y
+  local angle = CircleHelper:getAngle(self.radius)
+  for i = angle1, angle2, angle do
+    local z = self.blockInfo.z + self.radius * self.factor * CircleHelper:cos(i)
+    local radius = self.radius * CircleHelper:sin(i)
+    CircleHelper:insertCenterZ(x, y, z, radius)
+  end
 end
 
 -- 生成
@@ -193,10 +256,10 @@ local playerClickBlock = function (event)
       return
     end
     CircleHelper.blockInfo = { x = x, y = y, z = z, blockid = blockid, data = data }
-    Chat:sendSystemMsg('选择成功，是否以' .. CircleHelper.categoryName[CircleHelper.category]
-      .. '模式创建方块？')
-    Chat:sendSystemMsg('（选择快捷栏第' .. CircleHelper.sureShorcut .. '格确定，第'
-      .. CircleHelper.changeModelShorcut .. '格切换模式）')
+    Chat:sendSystemMsg('选择中心方块成功，是否以#B' .. CircleHelper.categoryName[CircleHelper.category]
+      .. '#n模式创建方块？')
+    Chat:sendSystemMsg('（选择快捷栏第#B' .. CircleHelper.sureShorcut .. '#n格确定，第#B'
+      .. CircleHelper.changeModelShorcut .. '#n格切换模式）')
   end)
 end
 

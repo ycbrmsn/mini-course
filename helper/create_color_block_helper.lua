@@ -1,15 +1,25 @@
--- 像素画工具类
+--[[
+  像素画工具v1.1.0
+  create by 莫小仙
+  可修改变量处可根据情况进行修改
+]]--  
 CreateColorBlockHelper = {
   -- 可修改变量
   blockid = 600, -- 默认毛料。毛料(600)，硬沙块(667)
-  category = 1, -- 创建方向。1竖直, 2水平
-  particleid = 1267, -- 特效
+  category = 1, -- 创建方向。1竖直（从下到上，从左往右）, 2水平（从近到远，从左往右）
+  particleid = 1267, -- 创建位置提示特效
   buffer = 50, -- 一帧创建的方块数，可根据图片大小适当改小
+  -- 快捷键序数 1~8
+  sureShorcut = 1, -- 确认栏
+  cancelShorcut = 2, -- 取消栏
+
   -- 不可修改变量
   dstPos = nil, -- 目标位置
   direct = nil,
   isCreating = false,
-  createIndex = 0,
+  createIndex = 1,
+  dataIndex = 1,
+  blockData = nil
 }
 
 -- 校验
@@ -24,9 +34,11 @@ function CreateColorBlockHelper:generate (objid)
   local result, direct = Actor:getCurPlaceDir(objid)
   self.direct = direct
   self.createIndex = 1
+  self.dataIndex = 1
   self.isCreating = true
+  self.blockData = colorBlockData[self.dataIndex]
   Chat:sendSystemMsg('开始生成，请耐心等待……')
-  CreateColorBlockHelper:stopEffect(CreateColorBlockHelper.dstPos)
+  CreateColorBlockHelper:stopEffect(self.dstPos)
 end
 
 function CreateColorBlockHelper:playEffect (pos)
@@ -55,8 +67,20 @@ local playerSelectShortcut = function (event)
     local objid = event.eventobjid
     local result, index = Player:getCurShotcut(objid)
     local result2, x, y, z = Actor:getPosition(objid)
-    if (index == 0) then
-      CreateColorBlockHelper:generate(objid)
+    if (index == CreateColorBlockHelper.sureShorcut - 1) then
+      if (CreateColorBlockHelper.dstPos) then
+        if (CreateColorBlockHelper.isCreating) then
+          Chat:sendSystemMsg('正在生成方块中')
+        else
+          CreateColorBlockHelper:generate(objid)
+        end
+      end
+    elseif (index == CreateColorBlockHelper.cancelShorcut - 1) then
+      if (CreateColorBlockHelper.dstPos) then
+        CreateColorBlockHelper:stopEffect(CreateColorBlockHelper.dstPos)
+        CreateColorBlockHelper.dstPos = nil
+        Chat:sendSystemMsg('已取消')
+      end
     end
   end)
 end
@@ -82,16 +106,16 @@ end
 local runGame = function ()
   CreateColorBlockHelper:check(function ()
     if (CreateColorBlockHelper.isCreating) then
-      if (CreateColorBlockHelper.createIndex <= #colorBlockData) then
+      if (CreateColorBlockHelper.createIndex <= #CreateColorBlockHelper.blockData) then
         local endIndex
-        if (CreateColorBlockHelper.createIndex + CreateColorBlockHelper.buffer - 1 <= #colorBlockData) then -- 足够
+        if (CreateColorBlockHelper.createIndex + CreateColorBlockHelper.buffer - 1 <= #CreateColorBlockHelper.blockData) then -- 足够
           endIndex = CreateColorBlockHelper.buffer - 1
         else -- 不够
-          endIndex = #colorBlockData - CreateColorBlockHelper.createIndex
+          endIndex = #CreateColorBlockHelper.blockData - CreateColorBlockHelper.createIndex
         end
         local x, y, z
         for i = 0, endIndex do
-          local data = colorBlockData[CreateColorBlockHelper.createIndex + i]
+          local data = CreateColorBlockHelper.blockData[CreateColorBlockHelper.createIndex + i]
           local category = CreateColorBlockHelper.category
           local direct = CreateColorBlockHelper.direct
           if (direct == FACE_DIRECTION.DIR_NEG_X) then -- 东
@@ -138,9 +162,16 @@ local runGame = function ()
           Block:setBlockAll(x, y, z, CreateColorBlockHelper.blockid + data[1], data[2])
         end
         CreateColorBlockHelper.createIndex = CreateColorBlockHelper.createIndex + endIndex + 1
-      else
-        CreateColorBlockHelper.isCreating = false
-        Chat:sendSystemMsg('生成完成')
+      else -- 处理完一个blockData
+        if (CreateColorBlockHelper.dataIndex < #colorBlockData) then -- 还有数据，则处理下一个
+          CreateColorBlockHelper.createIndex = 1
+          CreateColorBlockHelper.dataIndex = CreateColorBlockHelper.dataIndex + 1
+          CreateColorBlockHelper.blockData = colorBlockData[CreateColorBlockHelper.dataIndex]
+        else
+          CreateColorBlockHelper.isCreating = false
+          CreateColorBlockHelper.dstPos = nil
+          Chat:sendSystemMsg('生成完成')
+        end
       end
     end
   end)

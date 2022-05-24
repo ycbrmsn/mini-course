@@ -1,5 +1,5 @@
 --[[
-  时间工具类 v1.0.3
+  时间工具类 v1.1.0
   create by 莫小仙 on 2022-05-22
 ]]
 YcTimeHelper = {
@@ -142,6 +142,8 @@ function YcTimeHelper.runAfterTimeOnceTasks ()
     for t, f in pairs(taskMap) do
       f()
     end
+    YcTimeHelper.delAfterTimeOnceTasks(nil, frame) -- 删除任务映射
+  end
 end
 
 -- 生成任务
@@ -152,7 +154,7 @@ function YcTimeHelper.newAfterTimeOnceTask (f, seconds, t)
   seconds = seconds or 1 -- 默认为1秒后
   local frame = math.ceil(seconds * 20) -- 秒数转换为帧数
   frame = frame + YcTimeHelper.frame -- 实际帧数
-  local t = t or YcTimeHelper.getNextGlobalIndex() -- 任务类型默认为一个全局序数
+  local t = t or 'default' -- 任务类型默认为default
   YcTimeHelper.delAfterTimeOnceTasks(t, frame) -- 清空还未执行的同类型任务
   YcTimeHelper.addAfterTimeOnceTask(f, frame, t)
   return t
@@ -166,16 +168,3 @@ local runGame = function ()
 end
 
 ScriptSupportEvent:registerEvent([=[Game.Run]=], runGame) -- 游戏运行时注册事件
-
--- 测试
-ScriptSupportEvent:registerEvent([=[Player.ClickBlock]=], function ()
-  YcTimeHelper.newAfterTimeTask(function ()
-    Chat:sendSystemMsg('1秒后执行了')
-  end)
-  YcTimeHelper.newAfterTimeTask(function ()
-    Chat:sendSystemMsg('2秒后执行了')
-  end, 2)
-  YcTimeHelper.newAfterTimeTask(function ()
-    Chat:sendSystemMsg('3秒后执行了')
-  end, 3)
-end)

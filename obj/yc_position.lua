@@ -1,6 +1,6 @@
---[[
-  位置类 v1.0.1
+--[[ 位置类 v1.0.2
   create by 莫小仙 on 2022-05-14
+  last modified on 2022-06-03
 ]]
 YcPosition = {
   TYPE = 'YC_POSITION'

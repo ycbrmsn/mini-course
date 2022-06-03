@@ -1,6 +1,6 @@
---[[
-  聊天工具类 v1.0.0
+--[[ 聊天工具类 v1.0.1
   create by 莫小仙 on 2022-05-29
+  last modified on 2022-06-03
 ]]
 YcChatHelper = {
   SPEAK_COLOR = '#ceeeeee', -- 说话内容颜色

@@ -1,6 +1,6 @@
---[[
-  三维向量类 v1.0.0
+--[[ 三维向量类 v1.0.1
   create by 莫小仙 on 2022-05-15
+  last modified on 2022-06-03
 ]]
 YcVector3 = {
   TYPE = 'YC_VECTOR3'

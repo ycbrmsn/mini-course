@@ -1,6 +1,6 @@
---[[
-  时间工具类 v1.4.0
+--[[ 时间工具类 v1.4.1
   create by 莫小仙 on 2022-05-22
+  last modified on 2022-06-03
 ]]
 YcTimeHelper = {
   globalIndex = 0, -- 全局计数器，主要用于默认类型t
@@ -98,7 +98,7 @@ function YcTimeHelper.runAfterTimeTasks ()
   if tasks then -- 任务数组存在
     for i, task in ipairs(tasks) do -- 循环任务数组
       if task then -- 任务不为nil
-        task.f()
+        YcLogHelper.try(task.f)
       end
     end
     YcTimeHelper.delAfterTimeTask(nil, frame) -- 清除该帧所有任务
@@ -156,7 +156,7 @@ function YcTimeHelper.runAfterTimeOnceTasks ()
   local taskMap = YcTimeHelper.afterTimeOnceTaskInfo[frame]
   if taskMap then -- 找到任务映射
     for t, f in pairs(taskMap) do
-      f()
+      YcLogHelper.try(f)
     end
     YcTimeHelper.delAfterTimeOnceTask(nil, frame) -- 删除任务映射
   end
@@ -188,13 +188,13 @@ function YcTimeHelper.newCanPerformTask (f, seconds, t)
   local prevFrame = YcTimeHelper.canPerformTaskInfo[t] -- 最后执行的帧数
   if not prevFrame then -- 表示没有执行过
     YcTimeHelper.canPerformTaskInfo[t] = YcTimeHelper.frame -- 记录执行时间
-    f()
+    YcLogHelper.try(f)
     return 0
   else -- 表示之前执行过
     local remainingTime = prevFrame + math.ceil(seconds * 20) - YcTimeHelper.frame -- 剩余间隔时间
     if remainingTime <= 0 then -- 表示间隔时间已经足够了
       YcTimeHelper.canPerformTaskInfo[t] = YcTimeHelper.frame -- 记录执行时间
-      f()
+      YcLogHelper.try(f)
       return 0
     else -- 间隔时间不够
       return remainingTime
@@ -277,12 +277,14 @@ function YcTimeHelper.runIntervalTasks ()
   if arr then -- 找到任务信息数组
     local nextTimeInfos = {} -- 下一次还要执行的任务
     for i, info in ipairs(arr) do
-      local result = info.f()
-      if result then -- 满足条件
-        -- do nothing
-      else -- 不满足条件
-        table.insert(nextTimeInfos, info) -- 记录下这些任务
-      end
+      YcLogHelper.try(function ()
+        local result = info.f()
+        if result then -- 满足条件
+          -- do nothing
+        else -- 不满足条件
+          table.insert(nextTimeInfos, info) -- 记录下这些任务
+        end
+      end)
     end
     YcTimeHelper.delIntervalTask(nil, frame) -- 删除该帧的所有任务映射
     -- 添加还需要下次执行的任务
@@ -373,7 +375,9 @@ function YcTimeHelper.runContinueTasks ()
     if (info.frames > 0) then -- 表示还有剩余时间
       info.frames = info.frames - 1 -- 剩余帧数减1
     end
-    info.f(info.frames) -- 执行函数
+    YcLogHelper.try(function ()
+      info.f(info.frames) -- 执行函数
+    end)
   end
   -- 倒序删除
   for i = #YcTimeHelper.continueTaskInfo, 1, -1 do

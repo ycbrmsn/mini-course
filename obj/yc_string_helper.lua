@@ -1,6 +1,6 @@
---[[
-  字符串工具类 v1.0.0
+--[[ 字符串工具类 v1.1.0
   create by 莫小仙 on 2022-05-22
+  last modified on 2022-06-03
 ]]
 YcStringHelper = {}
 
@@ -30,6 +30,17 @@ end
 
 -- 拼接所有参数
 function YcStringHelper.concat (...)
+  local num = select("#", ...)
+  local str = ''
+  for i = 1, num do
+    local arg = select(i, ...)
+    str = str .. YcStringHelper.toString(arg)
+  end
+  return str
+end
+
+-- 拼接所有参数，其中nil值不拼接
+function YcStringHelper.concatWithoutNil (...)
   local num = select("#", ...)
   local str = ''
   for i = 1, num do

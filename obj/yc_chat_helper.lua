@@ -50,7 +50,7 @@ end
 -- 一定时间后发送聊天框信息
 function YcChatHelper.waitSendMsg (objid, seconds, ...)
   seconds = seconds or 2
-  if (seconds <= 0) then -- 时间为非正数，则立即执行
+  if seconds <= 0 then -- 时间为非正数，则立即执行
     YcChatHelper.sendMsg(objid, ...)
   else -- 延迟执行
     local content = YcStringHelper.concat(...)
@@ -63,7 +63,7 @@ end
 -- 模拟玩家/NPC一定时间后说
 function YcChatHelper.waitSpeak (name, toobjid, seconds, ...)
   seconds = seconds or 2
-  if (seconds <= 0) then -- 时间为非正数，则立即执行
+  if seconds <= 0 then -- 时间为非正数，则立即执行
     YcChatHelper.speak(name, toobjid, ...)
   else -- 延迟执行
     local content = YcStringHelper.concat(...)
@@ -76,7 +76,7 @@ end
 -- 模拟玩家/NPC一定时间后思考
 function YcChatHelper.waitThink (name, toobjid, seconds, ...)
   seconds = seconds or 2
-  if (seconds <= 0) then -- 时间为非正数，则立即执行
+  if seconds <= 0 then -- 时间为非正数，则立即执行
     YcChatHelper.think(name, toobjid, ...)
   else -- 延迟执行
     local content = YcStringHelper.concat(...)

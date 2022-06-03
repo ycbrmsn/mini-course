@@ -372,7 +372,7 @@ end
 function YcTimeHelper.runContinueTasks ()
   -- 顺序执行
   for i, info in ipairs(YcTimeHelper.continueTaskInfo) do -- 遍历所有任务
-    if (info.frames > 0) then -- 表示还有剩余时间
+    if info.frames > 0 then -- 表示还有剩余时间
       info.frames = info.frames - 1 -- 剩余帧数减1
     end
     YcLogHelper.try(function ()

@@ -1,5 +1,6 @@
 --[[ 背包工具类 v1.0.2
   create by 莫小仙 on 2022-06-14
+  last modified on 2022-06-19
 ]]
 YcBackpackHelper = {
   SHORTCUT = BACKPACK_TYPE.SHORTCUT, -- 快捷栏

@@ -1,5 +1,6 @@
 --[[ 缓存工具类 v1.0.1
   create by 莫小仙 on 2022-06-16
+  last modified on 2022-06-19
 ]]
 YcCacheHelper = {
   position = {

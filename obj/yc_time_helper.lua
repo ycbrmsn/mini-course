@@ -1,4 +1,4 @@
---[[ 时间工具类 v1.4.1
+--[[ 时间工具类 v1.4.2
   create by 莫小仙 on 2022-05-22
   last modified on 2022-06-03
 ]]
@@ -115,7 +115,7 @@ function YcTimeHelper.newAfterTimeTask (f, seconds, t)
   frame = frame + YcTimeHelper.frame -- 实际帧数
   local t = t or YcTimeHelper.getNextGlobalIndex() -- 任务类型默认为一个全局序数
   YcTimeHelper.addAfterTimeTask(f, frame, t)
-  return t
+  return t, frame
 end
 ------- end -------
 
@@ -173,7 +173,7 @@ function YcTimeHelper.newAfterTimeOnceTask (f, seconds, t)
   local t = t or 'default' -- 任务类型默认为default
   YcTimeHelper.delAfterTimeOnceTask(t, frame) -- 清空还未执行的同类型任务
   YcTimeHelper.addAfterTimeOnceTask(f, frame, t)
-  return t
+  return t, frame
 end
 ------- end -------
 

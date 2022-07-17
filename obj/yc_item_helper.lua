@@ -1,5 +1,6 @@
---[[ 道具工具类 v1.0.0
+--[[ 道具工具类 v1.0.1
   create by 莫小仙 on 2022-07-17
+  last modified on 2022-07-18
 ]]
 YcItemHelper = {
   MISSILE_STAY_SECONDS = 30, -- 投掷物信息保存时长（秒）
@@ -437,7 +438,7 @@ function YcItemHelper.ableUseSkill (objid, itemid, cd)
       if not frame then -- 该技能未使用过
         return true, 0
       else -- 技能使用过
-        local cdFrames = Math.ceil(cd * 20) -- 冷却时间换算为帧数
+        local cdFrames = math.ceil(cd * 20) -- 冷却时间换算为帧数
         local remainingTime = frame + cdFrames - YcTimeHelper.getFrame()
         if remainingTime <= 0 then -- 表示没有剩余时间
           return true, 0

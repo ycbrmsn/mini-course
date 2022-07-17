@@ -583,9 +583,9 @@ end)
 
 -- 玩家攻击命中事件
 YcEventHelper.registerEvent('Player.AttackHit', function (event)
-  local objid = event.eventobjidww
+  local objid = event.eventobjid
   local toobjid = event.toobjid
-  YcItemHelper.AttackHit(objid, toobjid)
+  YcItemHelper.attackHit(objid, toobjid)
 end)
 
 -- 投掷物击中事件

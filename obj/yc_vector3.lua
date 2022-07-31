@@ -1,6 +1,6 @@
---[[ 三维向量类 v1.0.1
+--[[ 三维向量类 v1.1.0
   create by 莫小仙 on 2022-05-15
-  last modified on 2022-06-03
+  last modified on 2022-07-31
 ]]
 YcVector3 = {
   TYPE = 'YC_VECTOR3'
@@ -31,14 +31,14 @@ function YcVector3:new (x1, y1, z1, x2, y2, z2)
   return o
 end
 
-YcVector3.ZERO = YcVector3:new(0, 0, 0)
-YcVector3.ONE = YcVector3:new(1, 1, 1)
-YcVector3.LEFT = YcVector3:new(-1, 0, 0) -- 对应西方向
-YcVector3.RIGHT = YcVector3:new(1, 0, 0) -- 对应东方向
-YcVector3.UP = YcVector3:new(0, 1, 0) -- 对应上方向
-YcVector3.DOWN = YcVector3:new(0, -1, 0) -- 对象下方向
-YcVector3.FORWARD = YcVector3:new(0, 0, 1) -- 对应北方向
-YcVector3.BACK = YcVector3:new(0, 0, -1) -- 对应南方向
+YcVector3.zero = YcVector3:new(0, 0, 0)
+YcVector3.one = YcVector3:new(1, 1, 1)
+YcVector3.left = YcVector3:new(-1, 0, 0) -- 对应西方向
+YcVector3.right = YcVector3:new(1, 0, 0) -- 对应东方向
+YcVector3.up = YcVector3:new(0, 1, 0) -- 对应上方向
+YcVector3.down = YcVector3:new(0, -1, 0) -- 对象下方向
+YcVector3.forward = YcVector3:new(0, 0, 1) -- 对应北方向
+YcVector3.back = YcVector3:new(0, 0, -1) -- 对应南方向
 
 -- 加法
 function YcVector3:__add (vec)
@@ -113,7 +113,7 @@ function YcVector3:cross (vec)
     return YcVector3:new(self.y * vec.z - self.z * vec.y,
       self.z * vec.x - self.x * vec.z, self.x * vec.y - self.y * vec.x)
   else
-    error('点乘对象是' .. type(vec) .. ', 不是三维向量')
+    error('叉乘对象是' .. type(vec) .. ', 不是三维向量')
   end
 end
 

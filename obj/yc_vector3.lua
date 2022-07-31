@@ -49,7 +49,7 @@ YcVector3.one = YcVector3:new(1, 1, 1)
 YcVector3.left = YcVector3:new(-1, 0, 0) -- 对应西方向
 YcVector3.right = YcVector3:new(1, 0, 0) -- 对应东方向
 YcVector3.up = YcVector3:new(0, 1, 0) -- 对应上方向
-YcVector3.down = YcVector3:new(0, -1, 0) -- 对象下方向
+YcVector3.down = YcVector3:new(0, -1, 0) -- 对应下方向
 YcVector3.forward = YcVector3:new(0, 0, 1) -- 对应北方向
 YcVector3.back = YcVector3:new(0, 0, -1) -- 对应南方向
 
@@ -150,7 +150,7 @@ end
 --[[
   叉乘
   @param  {YcVector3} vec 三维向量
-  @return {YcVector3} 三维向量，nil表示参数不是三维向量
+  @return {YcVector3 | nil} 三维向量，nil表示参数不是三维向量
 ]]
 function YcVector3:cross (vec)
   if YcVector3.isVector3(vec) then

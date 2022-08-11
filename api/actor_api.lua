@@ -1,5 +1,6 @@
---[[ 封装对象API v1.0.0
+--[[ 封装行为者API v1.1.0
   create by 莫小仙 on 2022-06-15
+  last modified on 2022-08-10
 ]]
 ActorAPI = {}
 
@@ -532,4 +533,59 @@ function ActorAPI.actorHurt (objid, toobjid, hp, attackType)
     return Actor:actorHurt(objid, toobjid, hp, attackType)
   end, '使生物对（玩家或生物）造成伤害', 'objid=', objid, ',toobjid=', toobjid, ',hp=', hp,
     ',attackType=', attackType)
+end
+
+--[[
+  @param  {integer} objid 玩家迷你号/生物id
+  @param  {integer} buffid 状态id
+  @param  {integer} bufflv 状态等级
+  @param  {integer} customticks 帧数，每秒20次
+  @return {boolean} 是否成功
+]]
+function ActorAPI.addBuff (objid, buffid, bufflv, customticks)
+  return YcApiHelper.callIsSuccessMethod(function ()
+    return Actor:addBuff(objid, buffid, bufflv, customticks)
+  end, '增加指定BUFF', 'objid=', objid, ',buffid=', buffid, ',bufflv=', bufflv,
+    ',customticks=', customticks)
+end
+
+--[[
+  @param  {integer} objid 玩家迷你号/生物id
+  @param  {integer} buffid 状态id
+  @return {boolean} 是否成功
+]]
+function ActorAPI.removeBuff (objid, buffid)
+  return YcApiHelper.callIsSuccessMethod(function ()
+    return Actor:removeBuff(objid, buffid)
+  end, '移除指定BUFF', 'objid=', objid,',buffid=', buffid)
+end
+
+--[[
+  @param  {integer} objid 玩家迷你号/生物id
+  @return {boolean} 是否成功
+]]
+function ActorAPI.clearAllBuff (objid)
+  return YcApiHelper.callIsSuccessMethod(function ()
+    return Actor:clearAllBuff(objid)
+  end, '清除全部BUFF', 'objid=', objid)
+end
+
+--[[
+  @param  {integer} objid 玩家迷你号/生物id
+  @return {boolean} 是否成功
+]]
+function ActorAPI.clearAllBadBuff (objid)
+  return YcApiHelper.callIsSuccessMethod(function ()
+    return Actor:clearAllBadBuff(objid)
+  end, '清除全部减益BUFF', 'objid=', objid)
+end
+
+--[[
+  是否已经有了指定BUFF
+  @param  {integer} objid 玩家迷你号/生物id
+  @param  {integer} buffid 状态id
+  @return {boolean} 是否有
+]]
+function ActorAPI.hasBuff (objid, buffid)
+  return Actor:hasBuff(objid, buffid) == ErrorCode.OK
 end

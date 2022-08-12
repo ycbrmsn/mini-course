@@ -7,6 +7,11 @@ Yuxianjian = YcItem:new({
     STATIC = 1, -- 滞空状态
     FORWARD = 2 -- 前行状态
   },
+  TYPE = {
+    STATIC = 'yuxianjianStaticFly', -- 滞空状态类型
+    FORWARD = 'yuxianjianForwardFly', -- 飞行前进类型
+    UP = 'yuxianjianUpFly' -- 向上飞行
+  },
   SPEED = {
     FLY_UP = 0.06, -- 玩家飞行上升速度
     FLY_FORWARD = 0.1, -- 飞行前进速度
@@ -14,16 +19,12 @@ Yuxianjian = YcItem:new({
     FLY_JUMP = 0.5, -- 玩家进入飞行状态时起跳的速度
     FLY_STATIC = 0.0785, -- 滞空速度
   },
-  TYPE = {
-    STATIC = 'yuxianjianStaticFly', -- 滞空状态类型
-    FORWARD = 'yuxianjianForwardFly', -- 飞行前进类型
-    UP = 'yuxianjianUpFly' -- 向上飞行
-  },
   PARTICLE_ID = 1237, -- 泡泡包裹特效
-  itemid = 4097, -- 御仙剑道具类型id
-  projectileItemid = 4098, -- 跟随的御仙剑道具类型id
-  buffid = 50000001, -- 飞行状态id
-  data = {} -- { objid = { state = state, flySwordId = flySwordId } }
+  data = {}, -- { objid = { state = state, flySwordId = flySwordId } }
+  -- 地图相关属性
+  itemid = 4097, -- 御仙剑道具类型id。不同地图取值可能不同
+  projectileItemid = 4098, -- 跟随的御仙剑道具类型id。不同地图取值可能不同
+  buffid = 50000001 -- 飞行状态id。不同地图取值可能不同
 })
 
 --[[
@@ -84,7 +85,7 @@ function Yuxianjian.changeFlyState (objid, nextState)
 end
 
 --[[
-  开始进入滞空状态
+  开始进入滞空飞行
   @param  {integer} objid 玩家迷你号
   @return {nil}
 ]]
@@ -107,7 +108,7 @@ function Yuxianjian.createFlySword (objid)
   local flyInfo = Yuxianjian.getFlyInfo(objid) -- 飞行信息
   flyInfo.flySwordId = flySwordId -- 记录下脚下仙剑的id
   local t = Yuxianjian.TYPE.STATIC + objid -- 类型，时间函数需要用到
-  -- 持续飞行
+  -- 持续抑制泡泡上升
   YcTimeHelper.newContinueTask(function ()
     ActorAPI.appendSpeed(objid, 0, Yuxianjian.SPEED.FLY_DOWN, 0) -- 抑制泡泡上升速度
     local swordPos = YcCacheHelper.getYcPosition(flySwordId) -- 御仙剑位置
@@ -210,12 +211,12 @@ function Yuxianjian.getState (objid)
 end
 
 --[[
-  玩家是否在飞行
+  判断玩家是否在飞行
   @param  {integer} objid 玩家迷你号
   @return {boolean} 是否飞行中
 ]]
 function Yuxianjian.isFlying (objid)
-  local state = Yuxianjian.getState(objid)
+  local state = Yuxianjian.getState(objid) -- 飞行状态
   return state ~= Yuxianjian.STATE.NONE
 end
 

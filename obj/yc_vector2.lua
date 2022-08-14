@@ -1,5 +1,6 @@
---[[ 二维向量类 v1.0.0
+--[[ 二维向量类 v1.0.1
   create by 莫小仙 on 2022-07-31
+  last modified on 2022-08-14
 ]]
 YcVector2 = {
   TYPE = 'YC_VECTOR2'
@@ -20,7 +21,7 @@ end
   @param  {number | table | nil} y1 数值或表
   @param  {number | nil} x2 数值或nil
   @param  {number | nil} y2 数值或nil
-  @return {YcVector2} 二维向量
+  @return {YcVector2 | nil} 二维向量，nil表示参数不合法
 ]]
 function YcVector2:new (x1, y1, x2, y2)
   local o
@@ -34,7 +35,8 @@ function YcVector2:new (x1, y1, x2, y2)
   elseif type(x1) == 'table' then -- 1个表
     return YcVector2:new(x1.x, x1.y)
   else -- 其他不合规定的参数
-    o = { x = 0, y = 0 }
+    -- o = { x = 0, y = 0 }
+    return nil
   end
   self.__index = self
   setmetatable(o, self)
@@ -170,7 +172,7 @@ end
 function YcVector2:normalize ()
   local length = self:length()
   if length == 0 then -- 长度为0
-    return YcVector2:new()
+    return YcVector2:new(0, 0)
   else
     return YcVector2:new(self.x / length, self.y / length)
   end

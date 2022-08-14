@@ -1,6 +1,6 @@
---[[ 三维向量类 v1.1.0
+--[[ 三维向量类 v1.1.1
   create by 莫小仙 on 2022-05-15
-  last modified on 2022-07-31
+  last modified on 2022-08-14
 ]]
 YcVector3 = {
   TYPE = 'YC_VECTOR3'
@@ -23,7 +23,7 @@ end
   @param  {number | nil} x2 数值或nil
   @param  {number | nil} y2 数值或nil
   @param  {number | nil} z2 数值或nil
-  @return {YcVector3} 三维向量
+  @return {YcVector3 | nil} 三维向量，nil表示参数不合法
 ]]
 function YcVector3:new (x1, y1, z1, x2, y2, z2)
   local o
@@ -37,7 +37,8 @@ function YcVector3:new (x1, y1, z1, x2, y2, z2)
   elseif type(x1) == 'table' then -- 1个表
     return YcVector3:new(x1.x, x1.y, x1.z)
   else -- 其他不合规定的参数
-    o = { x = 0, y = 0, z = 0 }
+    -- o = { x = 0, y = 0, z = 0 }
+    return nil
   end
   self.__index = self
   setmetatable(o, self)
@@ -176,7 +177,7 @@ end
 function YcVector3:normalize ()
   local length = self:length()
   if length == 0 then -- 长度为0
-    return YcVector3:new()
+    return YcVector3:new(0, 0, 0)
   else
     return YcVector3:new(self.x / length, self.y / length, self.z / length)
   end

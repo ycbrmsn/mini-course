@@ -214,27 +214,3 @@ function YcPositionHelper.getRectRange (pos, dim)
   return YcPosition:new(pos.x - dim.x, pos.y - dim.y, pos.z - dim.z), 
     YcPosition:new(pos.x + dim.x, pos.y + dim.y, pos.z + dim.z)
 end
-
--- -- 一个生物处于玩家的哪个角度，正前方为0，左负右正，正后方为180
--- function YcPositionHelper.getRelativePlayerAngle (objid, toobjid)
---   local player = PlayerHelper.getPlayer(objid)
---   local playerPos = player:getMyPosition()
---   local aimPos = YcPosition:new(PlayerHelper.getAimPos(objid))
---   local leftPos = player:getDistancePosition(1, -90) -- 左边点
---   local pos = CacheHelper.getMyPosition(toobjid)
---   local vx, vz = pos.x - playerPos.x, pos.z - playerPos.z
---   local angle1 = YcPositionHelper.getTwoVector2Angle(aimPos.x - playerPos.x, aimPos.z - playerPos.z, vx, vz) -- 与前方向量夹角
---   local angle2 = YcPositionHelper.getTwoVector2Angle(leftPos.x - playerPos.x, leftPos.z - playerPos.z, vx, vz) -- 与左方向量夹角
---   local angle
---   if (angle1 <= 90 and angle2 < 90) then -- 左前
---     angle = -angle1
---   elseif (angle1 <= 90 and angle2 >= 90) then -- 右前
---     angle = angle1
---   elseif (angle1 > 90 and angle2 < 90) then -- 左后
---     angle = -angle1
---   else -- 右后
---     angle = angle1
---   end
---   return math.floor(angle)
--- end
-

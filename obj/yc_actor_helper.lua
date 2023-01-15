@@ -100,9 +100,9 @@ end
 function YcActorHelper.getTeam (objid)
   local objType = ActorAPI.getObjType(objid) -- 获取行为者类型
   if objType == OBJ_TYPE.OBJTYPE_PLAYER then -- 是玩家
-    return PlayerHelper.getTeam(objid)
+    return PlayerAPI.getTeam(objid)
   elseif objType == OBJ_TYPE.OBJTYPE_CREATURE then -- 是生物
-    return CreatureHelper.getTeam(objid)
+    return CreatureAPI.getTeam(objid)
   elseif objType == OBJ_TYPE.OBJTYPE_DROPITEM then -- 掉落物
     return 0 -- 这里认为是无主之物
   elseif objType == OBJ_TYPE.OBJTYPE_MISSILE then -- 投掷物

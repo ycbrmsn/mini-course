@@ -1,5 +1,6 @@
---[[ 行为者工具类 v1.0.0
+--[[ 行为者工具类 v1.0.1
   create by 莫小仙 on 2023-01-14
+  last modified on 2023-01-19
 ]]
 YcActorHelper = {}
 
@@ -156,7 +157,7 @@ function YcActorHelper.filterTeam (objids, teamid, isTheSameTeam)
       tid = YcCacheHelper.getTeam(objid) -- 行为者队伍
       if isTheSameTeam and YcActorHelper.isTheSameTeam(teamid, tid) or -- 同队
         not isTheSameTeam and not YcActorHelper.isTheSameTeam(teamid, tid) then -- 不同队
-        table.insert(arr, v) -- 加入结果数组
+        table.insert(arr, objid) -- 加入结果数组
       end
     end
     return arr
@@ -231,10 +232,10 @@ function YcActorHelper.getAliveActors (objids)
   local aliveObjids = {}
   for i, objid in ipairs(objids) do
     local hp
-    if ActorHelper.isPlayer(objid) then -- 如果是玩家
-      hp = PlayerHelper.getHp(objid) -- 获取生命值
+    if ActorAPI.isPlayer(objid) then -- 如果是玩家
+      hp = PlayerAPI.getAttr(objid, PLAYERATTR.CUR_HP) -- 获取生命值
     else -- 如果是生物
-      hp = CreatureHelper.getHp(objid) -- 获取生命值
+      hp = CreatureAPI.getAttr(objid, CREATUREATTR.CUR_HP) -- 获取生命值
     end
     if hp and hp > 0 then -- 如果还有生命值
       table.insert(aliveObjids, objid) -- 加入数组

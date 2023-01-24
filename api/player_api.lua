@@ -591,7 +591,7 @@ end
 function PlayerAPI.operateQQMusic (operate, objid)
   return YcApiHelper.callIsSuccessMethod(function ()
     return Player:operateQQMusic(operate, objid)
-  end, '暂停/恢复/停止玩家的QQ音乐', 'operate=', operate,',objid=', objid)
+  end, '暂停/恢复/停止玩家的QQ音乐', 'operate=', operate,' ,objid=', objid)
 end
 
 --[[

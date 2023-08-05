@@ -1,20 +1,23 @@
---[[ 字符串工具类 v1.1.0
-  create by 莫小仙 on 2022-05-22
-  last modified on 2022-06-03
-]]
+--- 字符串工具类 v1.1.1
+--- created by 莫小仙 on 2022-05-22
+--- last modified on 2023-08-06
 YcStringHelper = {}
 
--- 转换为字符串
-function YcStringHelper.toString (obj)
+--- 转换为字符串
+---@param obj any 任意类型
+---@return string
+function YcStringHelper.toString(obj)
   if type(obj) == 'table' then
-    return YcStringHelper.tableToString (obj)
+    return YcStringHelper.tableToString(obj)
   else
     return tostring(obj)
   end
 end
 
--- 表转换为字符串
-function YcStringHelper.tableToString (t)
+--- 表转换为字符串
+---@param t table 表
+---@return string 转换结果
+function YcStringHelper.tableToString(t)
   local str = '{ '
   local index = 1
   for k, v in pairs(t) do
@@ -28,8 +31,10 @@ function YcStringHelper.tableToString (t)
   return str
 end
 
--- 拼接所有参数
-function YcStringHelper.concat (...)
+--- 拼接所有参数
+---@vararg any 任意类型
+---@return string 拼接结果
+function YcStringHelper.concat(...)
   local num = select("#", ...)
   local str = ''
   for i = 1, num do
@@ -39,8 +44,10 @@ function YcStringHelper.concat (...)
   return str
 end
 
--- 拼接所有参数，其中nil值不拼接
-function YcStringHelper.concatWithoutNil (...)
+--- 拼接所有参数，其中nil值不拼接
+---@vararg any 任意类型
+---@return string 拼接结果
+function YcStringHelper.concatWithoutNil(...)
   local num = select("#", ...)
   local str = ''
   for i = 1, num do
@@ -52,8 +59,12 @@ function YcStringHelper.concatWithoutNil (...)
   return str
 end
 
--- 拼接数组中所有元素
-function YcStringHelper.join (t, c, k)
+--- 拼接数组中所有元素
+---@param t any[] 任意数组
+---@param c string 用于连接数组中各个元素的字符串
+---@param k string | nil 如果是对象数组，则k是对象的键
+---@return string 拼接结果
+function YcStringHelper.join(t, c, k)
   c = c or ','
   local str = ''
   local len = #t
@@ -70,8 +81,12 @@ function YcStringHelper.join (t, c, k)
   return str
 end
 
--- 切分字符串
-function YcStringHelper.split (str, s, limit)
+--- 切分字符串
+---@param str string 需要被切分的字符串
+---@param s string 用于切分的字符串
+---@param limit integer | nil 限制切分后数组的长度，nil表示不限制
+---@return string[] 结果字符串数组
+function YcStringHelper.split(str, s, limit)
   if s == nil then
     s = ''
   else

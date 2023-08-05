@@ -1,22 +1,19 @@
---[[ 背包工具类 v1.0.2
-  create by 莫小仙 on 2022-06-14
-  last modified on 2022-06-19
-]]
+--- 背包工具类 v1.0.3
+--- created by 莫小仙 on 2022-06-14
+--- last modified on 2023-08-05
 YcBackpackHelper = {
   SHORTCUT = BACKPACK_TYPE.SHORTCUT, -- 快捷栏
   INVENTORY = BACKPACK_TYPE.INVENTORY, -- 存储栏
   EQUIP = BACKPACK_TYPE.EQUIP -- 装备栏
 }
 
---[[
-  判断玩家背包里是否有某道具
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @param  {boolean} containEquip 是否包含装备栏，默认不包含
-  @return {boolean} 是否有该道具
-  @return {integer | nil} 道具所在背包栏 1快捷栏 2储存栏 3装备栏，nil表示没有该道具
-]]
-function YcBackpackHelper.hasItem (objid, itemid, containEquip)
+--- 判断玩家背包里是否有某道具
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@param containEquip boolean | nil 是否包含装备栏，默认不包含
+---@return boolean 是否有该道具
+---@return integer | nil 道具所在背包栏 1快捷栏 2储存栏 3装备栏，nil表示没有该道具
+function YcBackpackHelper.hasItem(objid, itemid, containEquip)
   local r1 = BackpackAPI.hasItemByBackpackBar(objid, YcBackpackHelper.SHORTCUT, itemid) -- 快捷栏
   if r1 then -- 在快捷栏找到了
     return r1, YcBackpackHelper.SHORTCUT
@@ -39,16 +36,13 @@ function YcBackpackHelper.hasItem (objid, itemid, containEquip)
   end
 end
 
---[[
-  某背包栏中指定道具总数及该道具所在道具格数组
-  背包栏依次从快捷栏、存储栏、装备栏开始检测
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @param  {boolean} containEquip 是否包含装备栏
-  @return {integer} 所在背包栏道具总数
-  @return {table} 所在背包栏的道具格id数组
-]]
-function YcBackpackHelper.getItemNum (objid, itemid, containEquip)
+--- 某背包栏中指定道具总数及该道具所在道具格数组。背包栏依次从快捷栏、存储栏、装备栏开始检测
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@param containEquip boolean | nil 是否包含装备栏，默认不包含
+---@return integer 所在背包栏道具总数
+---@return integer[] 所在背包栏的道具格id数组
+function YcBackpackHelper.getItemNum(objid, itemid, containEquip)
   local r, bartype = YcBackpackHelper.hasItem(objid, itemid, containEquip)
   if r then
     return BackpackAPI.getItemNumByBackpackBar(objid, bartype, itemid)
@@ -57,48 +51,40 @@ function YcBackpackHelper.getItemNum (objid, itemid, containEquip)
   end
 end
 
---[[
-  获取快捷栏中指定道具总数及道具格数组
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @return {integer | nil} 背包里某个道具总数，nil表示获取失败
-  @return {table | nil} 道具所在道具格id数组，nil表示获取失败
-]]
-function YcBackpackHelper.getItemNumByShortcut (objid, itemid)
+--- 获取快捷栏中指定道具总数及道具格数组
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@return integer | nil 道具总数，nil表示获取失败
+---@return integer[] | nil 道具所在道具格id数组，nil表示获取失败
+function YcBackpackHelper.getItemNumByShortcut(objid, itemid)
   return BackpackAPI.getItemNumByBackpackBar(objid, YcBackpackHelper.SHORTCUT, itemid)
 end
 
---[[
-  获取存储栏中指定道具总数及道具格数组
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @return {integer | nil} 背包里某个道具总数，nil表示获取失败
-  @return {table | nil} 道具所在道具格id数组，nil表示获取失败
-]]
-function YcBackpackHelper.getItemNumByInventory (objid, itemid)
+--- 获取存储栏中指定道具总数及道具格数组
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@return integer | nil 道具总数，nil表示获取失败
+---@return integer[] | nil 道具所在道具格id数组，nil表示获取失败
+function YcBackpackHelper.getItemNumByInventory(objid, itemid)
   return BackpackAPI.getItemNumByBackpackBar(objid, YcBackpackHelper.INVENTORY, itemid)
 end
 
---[[
-  获取装备栏中指定道具总数及道具格数组
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @return {integer | nil} 背包里某个道具总数，nil表示获取失败
-  @return {table | nil} 道具所在道具格id数组，nil表示获取失败
-]]
-function YcBackpackHelper.getItemNumByEquip (objid, itemid)
+--- 获取装备栏中指定道具总数及道具格数组
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@return integer | nil 道具总数，nil表示获取失败
+---@return integer[] | nil 道具所在道具格id数组，nil表示获取失败
+function YcBackpackHelper.getItemNumByEquip(objid, itemid)
   return BackpackAPI.getItemNumByBackpackBar(objid, YcBackpackHelper.EQUIP, itemid)
 end
 
---[[
-  获取背包栏指定道具的总数及所在道具格数组
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @param  {boolean} containEquip 是否包含装备栏
-  @return {integer | nil} 道具总数
-  @return {table | nil} 道具所在道具格id数组
-]]
-function YcBackpackHelper.getItemNumAndGrids (objid, itemid, containEquip)
+--- 获取背包栏指定道具的总数及所在道具格数组
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@param containEquip boolean | nil 是否包含装备栏，默认不包含
+---@return integer | nil 道具总数，nil表示获取失败
+---@return integer[] | nil 道具所在道具格id数组，nil表示获取失败
+function YcBackpackHelper.getItemNumAndGrids(objid, itemid, containEquip)
   local num1, arr1 = YcBackpackHelper.getItemNumByShortcut(objid, itemid)
   if not num1 then -- 表示快捷栏没找到
     num1, arr1 = 0, {}
@@ -133,13 +119,11 @@ function YcBackpackHelper.getItemNumAndGrids (objid, itemid, containEquip)
   return num, arr
 end
 
---[[
-  获取玩家指定背包栏的第一个空的道具格
-  @param  {integer} objid 迷你号
-  @param  {integer} bartype 1快捷栏 2储存栏 3装备栏
-  @return {integer | nil} 道具格id，nil表示没有空道具格
-]]
-function YcBackpackHelper.getFirstEmptyGridByBartype (objid, bartype)
+--- 获取玩家指定背包栏的第一个空的道具格
+---@param objid integer 迷你号
+---@param bartype integer 背包栏类型：1快捷栏 2储存栏 3装备栏
+---@return integer | nil 道具格id，nil表示没有空道具格
+function YcBackpackHelper.getFirstEmptyGridByBartype(objid, bartype)
   local begGrid, endGrid = BackpackAPI.getBackpackBarIDRange(bartype)
   for i = begGrid, endGrid do
     local itemid, num = BackpackAPI.getGridItemID(objid, i)
@@ -150,14 +134,12 @@ function YcBackpackHelper.getFirstEmptyGridByBartype (objid, bartype)
   return nil
 end
 
---[[
-  获取玩家第一个空的道具格，从快捷栏到存储栏
-  @param  {integer} objid 迷你号
-  @return {integer | nil} 道具格id，nil表示没有空道具格
-  @return {integer | nil} 道具所在背包栏 1快捷栏 2储存栏，nil表示没有空道具格
-]]
-function YcBackpackHelper.getFirstEmptyGrid (objid)
-  local bartypes = { YcBackpackHelper.SHORTCUT, YcBackpackHelper.INVENTORY }
+--- 获取玩家第一个空的道具格，从快捷栏到存储栏
+---@param objid integer 迷你号
+---@return integer | nil 道具格id，nil表示没有空道具格
+---@return integer | nil 道具所在背包栏：1快捷栏 2储存栏，nil表示没有空道具格
+function YcBackpackHelper.getFirstEmptyGrid(objid)
+  local bartypes = {YcBackpackHelper.SHORTCUT, YcBackpackHelper.INVENTORY}
   local index = 1
   while index <= #bartypes do
     local bartype = bartypes[index]
@@ -170,14 +152,12 @@ function YcBackpackHelper.getFirstEmptyGrid (objid)
   return nil, nil
 end
 
---[[
-  获得道具，背包空间不足则丢地上
-  @param  {integer} objid 迷你号
-  @param  {integer} itemid 道具id
-  @param  {integer} num 道具数量
-  @return {boolean} 是否成功
-]]
-function YcBackpackHelper.gainItem (objid, itemid, num)
+--- 获得道具，背包空间不足则丢地上
+---@param objid integer 迷你号
+---@param itemid integer 道具id
+---@param num integer 道具数量
+---@return boolean 是否成功
+function YcBackpackHelper.gainItem(objid, itemid, num)
   num = num or 1
   local spaceNum = BackpackAPI.calcSpaceNumForItem(objid, itemid) or 0 -- 剩余空间
   if spaceNum >= num then -- 空间足够
@@ -190,12 +170,10 @@ function YcBackpackHelper.gainItem (objid, itemid, num)
   end
 end
 
---[[
-  获取玩家当前手持道具的道具格id
-  @param  {integer} objid 迷你号
-  @return {integer | nil} 快捷栏id，nil表示获取失败
-]]
-function YcBackpackHelper.getCurShotcutGrid (objid)
+--- 获取玩家当前手持道具的道具格id
+---@param objid integer 迷你号
+---@return integer | nil 快捷栏id，nil表示获取失败
+function YcBackpackHelper.getCurShotcutGrid(objid)
   local shotcut = PlayerAPI.getCurShotcut(objid)
   return shotcut and shotcut + 1000 or shotcut -- 类似三目运算
 end

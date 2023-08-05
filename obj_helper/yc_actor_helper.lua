@@ -1,77 +1,66 @@
---[[ 行为者工具类 v1.0.1
-  create by 莫小仙 on 2023-01-14
-  last modified on 2023-01-19
-]]
+--- 行为者工具类 v1.0.2
+--- created by 莫小仙 on 2023-01-14
+--- last modified on 2023-08-05
 YcActorHelper = {}
 
---[[
-  获取距离行为者多远的水平位置，受行为者朝向影响
-  @param  {integer} objid 行为者id
-  @param  {number} distance 距离。正数表示在前方，负数表示在后方
-  @param  {number} angle 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
-  @return {YcPosition} 位置
-]]--
-function YcActorHelper.getDistancePosition (objid, distance, angle)
+--- 获取距离行为者多远的水平位置，受行为者朝向影响
+---@param objid integer 行为者id
+---@param distance number 距离。正数表示在前方，负数表示在后方
+---@param angle number 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
+---@return YcPosition 位置
+function YcActorHelper.getDistancePosition(objid, distance, angle)
   angle = angle or 0 -- 默认为0
   local pos = YcCacheHelper.getYcPosition(objid) -- 行为者位置
   local angle2 = ActorAPI.getFaceYaw(objid) + angle -- 实际角度
   return YcPositionHelper.getDistancePosition(pos, angle2, distance)
 end
 
---[[
-  获取距离行为者多远的另一排水平位置，多个时依次为中、左、右、左、右...
-  @param  {integer} objid 行为者id
-  @param  {number} distance 距离。正数表示在前方，负数表示在后方
-  @param  {number} angle 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
-  @param  {integer} total 位置总数量，默认为1
-  @param  {number} step 垂直于角度边且距离角的顶点指定距离的直线上的间隔距离，默认为1
-  @param  {boolean} isFirstLeft 多个位置时，是否先左后右(从pos位置看)
-  @return {table} 位置数组
-]]
-function YcActorHelper.getDistancePositions (objid, distance, angle, total, step, isFirstLeft)
+--- 获取距离行为者多远的另一排水平位置，多个时依次为中、左、右、左、右...
+---@param objid integer 行为者id
+---@param distance number 距离。正数表示在前方，负数表示在后方
+---@param angle number 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
+---@param total integer 位置总数量，默认为1
+---@param step number 垂直于角度边且距离角的顶点指定距离的直线上的间隔距离，默认为1
+---@param isFirstLeft boolean 多个位置时，是否先左后右(从pos位置看)
+---@return YcPosition[] 位置数组
+function YcActorHelper.getDistancePositions(objid, distance, angle, total, step, isFirstLeft)
   angle = angle or 0 -- 默认为0
   local pos = YcCacheHelper.getYcPosition(objid) -- 行为者位置
   local angle2 = ActorAPI.getFaceYaw(objid) + angle -- 实际角度
   return YcPositionHelper.getDistancePositions(pos, angle2, distance, total, step, isFirstLeft)
 end
 
---[[
-  获取距离位置多远的另一排水平位置，多个时位置在米字形的一条线上
-  @param  {table} objid 行为者id
-  @param  {number} distance 距离。正数表示在前方，负数表示在后方
-  @param  {number} angle 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
-  @param  {integer} total 位置总数量，默认为1
-  @param  {integer} num 相邻格子的间隔格子数，默认为0
-  @param  {boolean} isFirstLeft 多个位置时，是否先左后右(从pos位置看)
-  @return {table} 位置数组
-]]
-function YcActorHelper.getGridDistancePositions (objid, distance, angle, total, num, isFirstLeft)
+--- 获取距离位置多远的另一排水平位置，多个时位置在米字形的一条线上
+---@param objid integer 行为者id
+---@param distance number 距离。正数表示在前方，负数表示在后方
+---@param angle number 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
+---@param total integer 位置总数量，默认为1
+---@param num integer 相邻格子的间隔格子数，默认为0
+---@param isFirstLeft boolean 多个位置时，是否先左后右(从pos位置看)
+---@return YcPosition[] 位置数组
+function YcActorHelper.getGridDistancePositions(objid, distance, angle, total, num, isFirstLeft)
   angle = angle or 0 -- 默认为0
   local pos = YcCacheHelper.getYcPosition(objid) -- 行为者位置
   local angle2 = ActorAPI.getFaceYaw(objid) + angle -- 实际角度
   return YcPositionHelper.getGridDistancePositions(pos, angle2, distance, total, num, isFirstLeft)
 end
 
---[[
-  获取距离行为者多远的水平位置，不因生物的朝向变化，默认在南方
-  @param  {integer} objid 行为者id
-  @param  {number} distance 距离。正数表示在前方，负数表示在后方
-  @param  {number} angle 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
-  @return {YcPosition} 位置
-]]
-function YcActorHelper.getFixedDistancePosition (objid, distance, angle)
+--- 获取距离行为者多远的水平位置，不因生物的朝向变化，默认在南方
+---@param objid integer 行为者id
+---@param distance number 距离。正数表示在前方，负数表示在后方
+---@param angle number 偏移角度，默认为0。正数为顺时针方向，负数逆时针方向
+---@return YcPosition 位置
+function YcActorHelper.getFixedDistancePosition(objid, distance, angle)
   angle = angle or 0 -- 默认为0
   local pos = YcCacheHelper.getYcPosition(objid) -- 行为者位置
   return YcPositionHelper.getDistancePosition(pos, angle, distance)
 end
 
---[[
-  获取目标行为者处于行为者的哪个水平角度
-  @param  {integer} objid 行为者id
-  @param  {integer} toobjid 目标行为者id
-  @return {number} 水平角度。正前方为0，左负右正，正后方为180
-]]
-function YcActorHelper.getRelativePlayerAngle (objid, toobjid)
+--- 获取目标行为者处于行为者的哪个水平角度
+---@param objid integer 行为者id
+---@param toobjid integer 目标行为者id
+---@return number 水平角度。正前方为0，左负右正，正后方为180
+function YcActorHelper.getRelativePlayerAngle(objid, toobjid)
   local x, y, z = ActorAPI.getPosition(objid) -- 行为者位置
   local tx, ty, tz = ActorAPI.getPosition(toobjid) -- 目标行为者位置
   local dx, dz = tx - x, tz - z -- 行为者到目标行为者的水平方向
@@ -93,12 +82,10 @@ function YcActorHelper.getRelativePlayerAngle (objid, toobjid)
   return math.floor(angle)
 end
 
---[[
-  获取行为者的队伍
-  @param  {integer} objid 行为者id
-  @return {integer | nil} 队伍id，nil表示获取队伍信息失败
-]]
-function YcActorHelper.getTeam (objid)
+--- 获取行为者的队伍
+---@param objid integer 行为者id
+---@return integer | nil 队伍id，nil表示获取队伍信息失败
+function YcActorHelper.getTeam(objid)
   local objType = ActorAPI.getObjType(objid) -- 获取行为者类型
   if objType == OBJ_TYPE.OBJTYPE_PLAYER then -- 是玩家
     return PlayerAPI.getTeam(objid)
@@ -113,13 +100,11 @@ function YcActorHelper.getTeam (objid)
   end
 end
 
---[[
-  判断是否是同队。无队伍不算同队
-  @param  {integer | nil} teamid1 队伍1id
-  @param  {integer | nil} teamid2 队伍2id
-  @return {boolean} 是否同队
-]]
-function YcActorHelper.isTheSameTeam (teamid1, teamid2)
+--- 判断是否是同队。无队伍不算同队
+---@param teamid1 integer | nil 队伍1id
+---@param teamid2 integer | nil 队伍2id
+---@return boolean 是否同队
+function YcActorHelper.isTheSameTeam(teamid1, teamid2)
   if teamid1 == teamid2 then -- id相同
     if teamid1 == nil or teamid1 == 0 then -- id为空 或 无队伍
       return false
@@ -131,32 +116,28 @@ function YcActorHelper.isTheSameTeam (teamid1, teamid2)
   end
 end
 
---[[
-  判断是否是同队的行为者。无队伍不算同队
-  @param  {integer} objid1 行为者1的id
-  @param  {integer} objid2 行为者2的id
-  @return {boolean} 是否同队
-]]
-function YcActorHelper.isTheSameTeamActor (objid1, objid2)
+--- 判断是否是同队的行为者。无队伍不算同队
+---@param objid1 integer 行为者1的id
+---@param objid2 integer 行为者2的id
+---@return boolean 是否同队
+function YcActorHelper.isTheSameTeamActor(objid1, objid2)
   local teamid1 = YcCacheHelper.getTeam(objid1)
   local teamid2 = YcCacheHelper.getTeam(objid2)
   return YcActorHelper.isTheSameTeam(teamid1, teamid2)
 end
 
---[[
-  获取过滤掉不满足队伍信息的行为者数组
-  @param  {table} objids 行为者id数组
-  @param  {integer | nil} teamid 队伍id或空
-  @param  {boolean | nil} isTheSameTeam 是否同队，默认不是同队
-  @return {table} 行为者id数组
-]]
-function YcActorHelper.filterTeam (objids, teamid, isTheSameTeam)
+--- 获取过滤掉不满足队伍信息的行为者数组
+---@param objids integer[] 行为者id数组
+---@param teamid integer | nil 队伍id或空
+---@param isTheSameTeam boolean | nil 是否同队，默认不是同队
+---@return integer[] 行为者id数组
+function YcActorHelper.filterTeam(objids, teamid, isTheSameTeam)
   if objids and teamid then -- 有队伍信息
     local arr, tid = {}
     for i, objid in ipairs(objids) do -- 遍历数组
       tid = YcCacheHelper.getTeam(objid) -- 行为者队伍
       if isTheSameTeam and YcActorHelper.isTheSameTeam(teamid, tid) or -- 同队
-        not isTheSameTeam and not YcActorHelper.isTheSameTeam(teamid, tid) then -- 不同队
+      not isTheSameTeam and not YcActorHelper.isTheSameTeam(teamid, tid) then -- 不同队
         table.insert(arr, objid) -- 加入结果数组
       end
     end
@@ -166,69 +147,59 @@ function YcActorHelper.filterTeam (objids, teamid, isTheSameTeam)
   end
 end
 
---[[
-  获取位置附近的所有玩家
-  @param  {table} pos 位置
-  @param  {table} dim 区域尺寸大小
-  @param  {integer | nil} 队伍id
-  @param  {boolean | nil} 是否同队，默认不同队
-  @return {table} 玩家迷你号数组
-]]
-function YcActorHelper.getAllPlayersArroundPos (pos, dim, teamid, isTheSameTeam)
+--- 获取位置附近的所有玩家
+---@param pos table{ x: number, y: number, z: number } 位置
+---@param dim table{ x: number, y: number, z: number } 区域尺寸大小
+---@param teamid integer | nil 队伍id
+---@param isTheSameTeam boolean | nil 是否同队，默认不同队
+---@return integer[] 玩家迷你号数组
+function YcActorHelper.getAllPlayersArroundPos(pos, dim, teamid, isTheSameTeam)
   local posBeg, posEnd = YcPositionHelper.getRectRange(pos, dim) -- 根据区域中点与尺寸查询区域的起止位置
   local objids = AreaAPI.getAllObjsInAreaRange(posBeg, posEnd, OBJ_TYPE.OBJTYPE_PLAYER) -- 查询区域内所有玩家
   return YcActorHelper.filterTeam(objids, teamid, isTheSameTeam) -- 过滤队伍
 end
 
---[[
-  获取位置附近的所有生物
-  @param  {table} pos 位置
-  @param  {table} dim 区域尺寸大小
-  @param  {integer | nil} 队伍id
-  @param  {boolean | nil} 是否同队，默认不同队
-  @return {table} 生物id数组
-]]
-function YcActorHelper.getAllCreaturesArroundPos (pos, dim, teamid, isTheSameTeam)
+--- 获取位置附近的所有生物
+---@param pos table{ x: number, y: number, z: number } 位置
+---@param dim table{ x: number, y: number, z: number } 区域尺寸大小
+---@param teamid integer | nil 队伍id
+---@param isTheSameTeam boolean | nil 是否同队，默认不同队
+---@return integer[] 生物id数组
+function YcActorHelper.getAllCreaturesArroundPos(pos, dim, teamid, isTheSameTeam)
   local posBeg, posEnd = YcPositionHelper.getRectRange(pos, dim) -- 根据区域中点与尺寸查询区域的起止位置
   local objids = AreaAPI.getAllObjsInAreaRange(posBeg, posEnd, OBJ_TYPE.OBJTYPE_CREATURE) -- 查询区域内所有生物
   return YcActorHelper.filterTeam(objids, teamid, isTheSameTeam) -- 过滤队伍
 end
 
---[[
-  获取附近的所有投掷物
-  @param  {table} pos 位置
-  @param  {table} dim 区域尺寸大小
-  @param  {integer | nil} 队伍id
-  @param  {boolean | nil} 是否同队，默认不同队
-  @return {table} 投掷物id数组
-]]
-function YcActorHelper.getAllMissilesArroundPos (pos, dim, teamid, isTheSameTeam)
+--- 获取附近的所有投掷物
+---@param pos table{ x: number, y: number, z: number } 位置
+---@param dim table{ x: number, y: number, z: number } 区域尺寸大小
+---@param teamid integer | nil 队伍id
+---@param isTheSameTeam boolean | nil 是否同队，默认不同队
+---@return integer[] 投掷物id数组
+function YcActorHelper.getAllMissilesArroundPos(pos, dim, teamid, isTheSameTeam)
   local posBeg, posEnd = YcPositionHelper.getRectRange(pos, dim) -- 根据区域中点与尺寸查询区域的起止位置
   local objids = AreaAPI.getAllObjsInAreaRange(posBeg, posEnd, OBJ_TYPE.OBJTYPE_MISSILE) -- 查询区域内所有投掷物
   return YcActorHelper.filterTeam(objids, teamid, isTheSameTeam) -- 过滤队伍
 end
 
---[[
-  获取附近的所有玩家和生物
-  @param  {table} pos 位置
-  @param  {table} dim 区域尺寸大小
-  @param  {integer | nil} 队伍id
-  @param  {boolean | nil} 是否同队，默认不同队
-  @return {table} 玩家迷你号/生物id数组
-]]
-function YcActorHelper.getAllPlayersAndCreaturesArroundPos (pos, dim, teamid, isTheSameTeam)
+--- 获取附近的所有玩家和生物
+---@param pos table{ x: number, y: number, z: number } 位置
+---@param dim table{ x: number, y: number, z: number } 区域尺寸大小
+---@param teamid integer | nil 队伍id
+---@param isTheSameTeam boolean | nil 是否同队，默认不同队
+---@return integer[] 玩家迷你号/生物id数组
+function YcActorHelper.getAllPlayersAndCreaturesArroundPos(pos, dim, teamid, isTheSameTeam)
   local posBeg, posEnd = YcPositionHelper.getRectRange(pos, dim) -- 根据区域中点与尺寸查询区域的起止位置
   local objids = AreaAPI.getAllObjsInAreaRangeByObjTypes(posBeg, posEnd,
-    { OBJ_TYPE.OBJTYPE_PLAYER, OBJ_TYPE.OBJTYPE_CREATURE }) -- 查询区域内所有玩家和生物
+    {OBJ_TYPE.OBJTYPE_PLAYER, OBJ_TYPE.OBJTYPE_CREATURE}) -- 查询区域内所有玩家和生物
   return YcActorHelper.filterTeam(objids, teamid, isTheSameTeam) -- 过滤队伍
 end
 
---[[
-  获取数组中活着的行为者
-  @param  {table} objids 玩家/生物id数组
-  @return {table} 活着的玩家/生物id数组
-]]
-function YcActorHelper.getAliveActors (objids)
+--- 获取数组中活着的行为者
+---@param objids integer[] 玩家/生物id数组
+---@return integer[] 活着的玩家/生物id数组
+function YcActorHelper.getAliveActors(objids)
   local aliveObjids = {}
   for i, objid in ipairs(objids) do
     local hp
@@ -244,15 +215,13 @@ function YcActorHelper.getAliveActors (objids)
   return aliveObjids
 end
 
---[[
-  获取距离pos最近的行为者id isTwo是否是二维平面
-  @param  {table} objids 行为者id数组
-  @param  {table} pos 位置
-  @param  {boolean} isTwo 是否是只看水平的二维平面上
-  @return {integer | nil} 行为者id，nil表示没有行为者
-  @return {number | nil} 最短距离，nil表示没有行为者
-]]
-function YcActorHelper.getNearestActor (objids, pos, isTwo)
+--- 获取距离pos最近的行为者id isTwo是否是二维平面
+---@param objids integer[] 行为者id数组
+---@param pos table{ x: number, y: number, z: number } 位置
+---@param isTwo boolean 是否是只看水平的二维平面上
+---@return integer | nil 行为者id，nil表示没有行为者
+---@return number | nil 最短距离，nil表示没有行为者
+function YcActorHelper.getNearestActor(objids, pos, isTwo)
   local objid, minDistance
   for i, v in ipairs(objids) do
     local p = YcCacheHelper.getYcPosition(v) -- 查询行为者位置

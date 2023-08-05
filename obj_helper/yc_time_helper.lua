@@ -1,7 +1,6 @@
---[[ 时间工具类 v1.4.2
-  create by 莫小仙 on 2022-05-22
-  last modified on 2022-06-03
-]]
+--- 时间工具类 v1.4.3
+--- created by 莫小仙 on 2022-05-22
+--- last modified on 2023-08-06
 YcTimeHelper = {
   globalIndex = 0, -- 全局计数器，主要用于默认类型t
   frame = 0, -- 帧数
@@ -23,35 +22,41 @@ YcTimeHelper = {
   continueTaskInfo = {} -- { { f = f, t = t, frames = frames }, ... }
 }
 
--- 获取下一个序数
-function YcTimeHelper.getNextGlobalIndex ()
+--- 获取下一个序数
+function YcTimeHelper.getNextGlobalIndex()
   YcTimeHelper.globalIndex = YcTimeHelper.globalIndex + 1
   return YcTimeHelper.globalIndex
 end
 
--- 获取帧数
-function YcTimeHelper.getFrame ()
+--- 获取帧数
+function YcTimeHelper.getFrame()
   return YcTimeHelper.frame
 end
 
--- 帧数递增
-function YcTimeHelper.addFrame ()
+--- 帧数递增
+---@return nil
+function YcTimeHelper.addFrame()
   if YcTimeHelper.frameInfo[YcTimeHelper.frame] then -- 如果上一帧有记录
     YcTimeHelper.frameInfo[YcTimeHelper.frame] = nil -- 清除历史数据
   end
   YcTimeHelper.frame = YcTimeHelper.frame + 1
 end
 
--- 获取当前帧信息
-function YcTimeHelper.getFrameInfo (key)
+--- 获取当前帧指定键的信息
+---@param key string 键
+---@return table | nil 信息，nil表示信息不存在
+function YcTimeHelper.getFrameInfo(key)
   if not YcTimeHelper.frameInfo[YcTimeHelper.frame] then -- 如果当前帧没有任何信息
     return nil
   end
   return YcTimeHelper.frameInfo[YcTimeHelper.frame][key]
 end
 
--- 设置当前帧信息
-function YcTimeHelper.setFrameInfo (key, value)
+--- 设置当前帧信息
+---@param key string 键
+---@param value table 信息
+---@return nil
+function YcTimeHelper.setFrameInfo(key, value)
   if not YcTimeHelper.frameInfo[YcTimeHelper.frame] then -- 如果当前帧没有任何信息
     YcTimeHelper.frameInfo[YcTimeHelper.frame] = {}
   end
@@ -59,18 +64,31 @@ function YcTimeHelper.setFrameInfo (key, value)
 end
 
 ------- 几秒后执行任务 -------
--- 添加任务
-function YcTimeHelper.addAfterTimeTask (f, frame, t)
+
+--- 添加任务
+--- 框架内调用
+---@param f function 执行函数
+---@param frame integer 帧数
+---@param t string 类型
+---@return nil
+function YcTimeHelper.addAfterTimeTask(f, frame, t)
   local tasks = YcTimeHelper.afterTimeTaskInfo[frame]
   if not tasks then -- 没找到任何任务，则在该帧初始化一个任务数组
     tasks = {}
     YcTimeHelper.afterTimeTaskInfo[frame] = tasks
   end
-  table.insert(tasks, { f = f, t = t }) -- 添加任务
+  table.insert(tasks, {
+    f = f,
+    t = t
+  }) -- 添加任务
 end
 
--- 删除任务。供使用方法
-function YcTimeHelper.delAfterTimeTask (t, frame)
+--- 删除任务。t和frame不同同时不存在。
+--- 供使用方法
+---@param t string | number | nil 任务类型，nil表示删除指定帧数的所有任务
+---@param frame integer | nil 帧数，nil表示删除指定类型的所有任务
+---@return nil
+function YcTimeHelper.delAfterTimeTask(t, frame)
   if not t and frame then -- 没有指定类型而有帧数，表示删除该帧的所有任务
     YcTimeHelper.afterTimeTaskInfo[frame] = nil
   elseif t and frame then -- 同时指定了类型与帧，表示删除该帧下的特定类型任务
@@ -91,8 +109,10 @@ function YcTimeHelper.delAfterTimeTask (t, frame)
   end
 end
 
--- 运行任务
-function YcTimeHelper.runAfterTimeTasks ()
+--- 运行任务
+--- 框架内调用
+---@return nil
+function YcTimeHelper.runAfterTimeTasks()
   local frame = YcTimeHelper.frame
   local tasks = YcTimeHelper.afterTimeTaskInfo[frame]
   if tasks then -- 任务数组存在
@@ -105,8 +125,14 @@ function YcTimeHelper.runAfterTimeTasks ()
   end
 end
 
--- 生成任务，返回类型。供使用方法
-function YcTimeHelper.newAfterTimeTask (f, seconds, t)
+--- 生成任务。用于几秒后执行函数
+--- 供使用方法
+---@param f function 执行函数
+---@param seconds number | nil 延迟秒数。默认为1秒
+---@param t string | number | nil 类型，nil则是自动生成一个数字类型
+---@return string | number 任务类型。删除任务时可能会用到
+---@return integer 执行时的帧数
+function YcTimeHelper.newAfterTimeTask(f, seconds, t)
   if type(f) ~= 'function' then -- 如果f不是函数，则不创建
     return
   end
@@ -120,8 +146,14 @@ end
 ------- end -------
 
 ------- 几秒后执行一次任务，会清除掉之前还未执行的同种任务 -------
--- 添加任务
-function YcTimeHelper.addAfterTimeOnceTask (f, frame, t)
+
+--- 添加任务
+--- 框架内调用
+---@param f function 执行函数
+---@param frame integer 延迟帧数
+---@param t string | number 任务类型
+---@return nil
+function YcTimeHelper.addAfterTimeOnceTask(f, frame, t)
   local taskMap = YcTimeHelper.afterTimeOnceTaskInfo[frame]
   if not taskMap then -- 该帧对应任务映射不存在
     taskMap = {}
@@ -130,8 +162,12 @@ function YcTimeHelper.addAfterTimeOnceTask (f, frame, t)
   taskMap[t] = f -- 设置任务映射
 end
 
--- 删除任务。供使用方法
-function YcTimeHelper.delAfterTimeOnceTask (t, frame)
+--- 删除任务。t和frame不同同时不存在。
+--- 供使用方法
+---@param t string | number | nil 任务类型，nil表示删除指定帧数的所有任务
+---@param frame integer | nil 帧数，nil表示删除指定类型的所有任务
+---@return nil
+function YcTimeHelper.delAfterTimeOnceTask(t, frame)
   if not t and frame then -- 没有类型而有帧数，则删除该帧下的所有任务
     YcTimeHelper.afterTimeOnceTaskInfo[frame] = nil
   elseif t and frame then -- 有类型有帧数，则删除将来最后一次执行时间与当前时间之间的相同类型的任务
@@ -150,8 +186,10 @@ function YcTimeHelper.delAfterTimeOnceTask (t, frame)
   end
 end
 
--- 运行任务
-function YcTimeHelper.runAfterTimeOnceTasks ()
+--- 运行任务
+--- 框架内调用
+---@return nil
+function YcTimeHelper.runAfterTimeOnceTasks()
   local frame = YcTimeHelper.frame
   local taskMap = YcTimeHelper.afterTimeOnceTaskInfo[frame]
   if taskMap then -- 找到任务映射
@@ -162,8 +200,14 @@ function YcTimeHelper.runAfterTimeOnceTasks ()
   end
 end
 
--- 生成任务，返回类型。供使用方法
-function YcTimeHelper.newAfterTimeOnceTask (f, seconds, t)
+--- 生成任务。用于几秒后执行一次。会删除掉在这个执行时间之前的还没有执行的同种任务
+--- 供使用方法
+---@param f function 执行函数
+---@param seconds number 延迟秒数
+---@param t string | number | nil 任务类型，默认为default
+---@return string | number 任务类型
+---@return integer 执行时的帧数
+function YcTimeHelper.newAfterTimeOnceTask(f, seconds, t)
   if type(f) ~= 'function' then -- 如果f不是函数，则不创建
     return
   end
@@ -178,8 +222,14 @@ end
 ------- end -------
 
 ------- 与上次的同种任务执行时间间隔超过多长时，本次才会执行任务 -------
--- 生成任务，返回剩余时间。供使用方法
-function YcTimeHelper.newCanPerformTask (f, seconds, t)
+
+--- 生成任务
+--- 供使用方法
+---@param f function 执行函数
+---@param seconds number 间隔秒数
+---@param t string | number | nil 任务类型，默认为default
+---@return integer 还剩多少时间（帧数）将会执行
+function YcTimeHelper.newCanPerformTask(f, seconds, t)
   if type(f) ~= 'function' then -- 如果f不是函数，则不进行后续操作
     return -1
   end
@@ -202,8 +252,11 @@ function YcTimeHelper.newCanPerformTask (f, seconds, t)
   end
 end
 
--- 删除任务执行记录。供使用方法
-function YcTimeHelper.delCanPerformTaskRecord (t)
+--- 删除任务执行记录
+--- 供使用方法
+---@param t string | number | nil 任务类型，默认为default
+---@return nil
+function YcTimeHelper.delCanPerformTaskRecord(t)
   t = t or 'default'
   if YcTimeHelper.canPerformTaskInfo[t] then -- 如果该类型有执行记录
     YcTimeHelper.canPerformTaskInfo[t] = nil -- 清除记录
@@ -212,8 +265,14 @@ end
 ------- end -------
 
 ------- 定时重复执行任务，满足条件后结束 -------
--- 添加任务
-function YcTimeHelper.addIntervalTask (f, frames, t)
+
+--- 添加任务
+--- 框架内调用
+---@param f function 执行函数
+---@param frames integer 间隔帧数
+---@param t string | number 任务类型
+---@return nil
+function YcTimeHelper.addIntervalTask(f, frames, t)
   local frame = YcTimeHelper.frame + frames -- 下一次执行时间
   local info = {
     f = f,
@@ -224,14 +283,18 @@ function YcTimeHelper.addIntervalTask (f, frames, t)
   YcTimeHelper.intervalTaskInfo.t[t] = info -- 设置类型信息
   -- 设置帧信息
   if not YcTimeHelper.intervalTaskInfo.frame[frame] then -- 对应帧信息数组不存在
-    YcTimeHelper.intervalTaskInfo.frame[frame] = { info }
+    YcTimeHelper.intervalTaskInfo.frame[frame] = {info}
   else -- 信息数组已存在
     table.insert(YcTimeHelper.intervalTaskInfo.frame[frame], info)
   end
 end
 
--- 删除任务，返回是否删除成功。供使用方法
-function YcTimeHelper.delIntervalTask (t, frame)
+--- 删除任务
+--- 供使用方法
+---@param t string | number | nil 任务类型，nil表示删除指定帧数的所有任务
+---@param frame integer | nil 帧数，nil表示删除指定类型的所有任务
+---@return boolean 是否删除成功
+function YcTimeHelper.delIntervalTask(t, frame)
   if t then -- 通过类型删除，会删除frame数组中对应信息
     local info = YcTimeHelper.intervalTaskInfo.t[t]
     if info then -- 存在该类型任务
@@ -270,14 +333,16 @@ function YcTimeHelper.delIntervalTask (t, frame)
   return false
 end
 
--- 运行任务
-function YcTimeHelper.runIntervalTasks ()
+--- 运行任务
+--- 框架内调用
+---@return nil
+function YcTimeHelper.runIntervalTasks()
   local frame = YcTimeHelper.frame
   local arr = YcTimeHelper.intervalTaskInfo.frame[frame]
   if arr then -- 找到任务信息数组
     local nextTimeInfos = {} -- 下一次还要执行的任务
     for i, info in ipairs(arr) do
-      YcLogHelper.try(function ()
+      YcLogHelper.try(function()
         local result = info.f()
         if result then -- 满足条件
           -- do nothing
@@ -294,8 +359,13 @@ function YcTimeHelper.runIntervalTasks ()
   end
 end
 
--- 生成任务。供使用方法
-function YcTimeHelper.newIntervalTask (f, seconds, t)
+--- 生成任务。用于定时重复执行任务，满足条件后结束
+--- 供使用方法
+---@param f function 执行函数
+---@param seconds number 间隔秒数
+---@param t string | number | nil 任务类型，默认为default
+---@return nil
+function YcTimeHelper.newIntervalTask(f, seconds, t)
   if type(f) ~= 'function' then -- 如果f不是函数，则不进行后续操作
     return
   end
@@ -320,7 +390,7 @@ function YcTimeHelper.newIntervalTask (f, seconds, t)
         YcTimeHelper.delIntervalTask(t) -- 删除定时任务信息
         YcTimeHelper.addIntervalTask(f, frameDiff, t) -- 添加任务
       end
-    end 
+    end
   else -- 没有执行过该定时任务
     local result = f() -- 执行并获取返回值
     if result then -- 返回值为真，表示满足条件，则没有后续操作
@@ -333,8 +403,12 @@ end
 ------- end -------
 
 ------- 持续执行多长时间 -------
--- 添加任务
-function YcTimeHelper.addContinueTask (f, frames, t)
+--- 添加任务
+--- 框架内调用
+---@param f function 执行函数
+---@param frames integer 持续执行多久（帧数）
+---@param t string | number 任务类型
+function YcTimeHelper.addContinueTask(f, frames, t)
   local task
   for i, info in ipairs(YcTimeHelper.continueTaskInfo) do -- 遍历所有持续任务
     if info.t == t then -- 找到相同类型
@@ -355,8 +429,11 @@ function YcTimeHelper.addContinueTask (f, frames, t)
   end
 end
 
--- 删除任务，返回是否删除成功。供使用方法
-function YcTimeHelper.delContinueTask (t)
+--- 删除任务
+--- 供使用方法
+---@param t string | number | nil 任务类型，默认为default
+---@return boolean 是否删除成功
+function YcTimeHelper.delContinueTask(t)
   t = t or 'default'
   for i = #YcTimeHelper.continueTaskInfo, 1, -1 do -- 倒序遍历所有任务
     local info = YcTimeHelper.continueTaskInfo[i]
@@ -368,14 +445,16 @@ function YcTimeHelper.delContinueTask (t)
   return false
 end
 
--- 运行任务
-function YcTimeHelper.runContinueTasks ()
+--- 运行任务
+--- 框架内调用
+---@return nil
+function YcTimeHelper.runContinueTasks()
   -- 顺序执行
   for i, info in ipairs(YcTimeHelper.continueTaskInfo) do -- 遍历所有任务
     if info.frames > 0 then -- 表示还有剩余时间
       info.frames = info.frames - 1 -- 剩余帧数减1
     end
-    YcLogHelper.try(function ()
+    YcLogHelper.try(function()
       info.f(info.frames) -- 执行函数
     end)
   end
@@ -388,8 +467,13 @@ function YcTimeHelper.runContinueTasks ()
   end
 end
 
--- 生成任务。供使用方法
-function YcTimeHelper.newContinueTask (f, seconds, t)
+--- 生成任务。用于持续执行任务多长时间
+--- 供使用方法
+---@param f function 执行函数
+---@param seconds number | nil 持续执行多久（帧数），默认为一直执行
+---@param t string | number | nil 任务类型默认为default
+---@return nil
+function YcTimeHelper.newContinueTask(f, seconds, t)
   if type(f) ~= 'function' then -- 如果f不是函数，则不进行后续操作
     return
   end
@@ -401,7 +485,7 @@ end
 ------- end -------
 
 -- 游戏运行时函数
-local runGame = function ()
+local runGame = function()
   YcTimeHelper.addFrame() -- 帧数递增
   YcTimeHelper.runAfterTimeTasks() -- 运行当前帧对应的 一定时间后执行的任务
   YcTimeHelper.runAfterTimeOnceTasks() -- 运行当前帧对应的 一定时间后才会执行的任务

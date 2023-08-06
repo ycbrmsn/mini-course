@@ -1,18 +1,23 @@
---[[ 位置类 v1.0.2
-  create by 莫小仙 on 2022-05-14
-  last modified on 2022-06-03
-]]
+--- 位置类 v1.0.3
+--- created by 莫小仙 on 2022-05-14
+--- last modified on 2023-08-06
 YcPosition = {
   TYPE = 'YC_POSITION'
 }
 
--- 是否是位置对象
-function YcPosition.isPosition (pos)
+--- 判断是否是位置对象
+---@param pos table
+---@return boolean
+function YcPosition.isPosition(pos)
   return not not (pos and pos.TYPE and pos.TYPE == YcPosition.TYPE)
 end
 
--- 创建一个位置对象
-function YcPosition:new (x, y, z)
+--- 创建一个位置对象
+---@param x number | nil x位置，默认为0
+---@param y number | nil y位置，默认为0
+---@param z number | nil z位置，默认为0
+---@return YcPosition 位置对象
+function YcPosition:new(x, y, z)
   x = x or 0 -- 没有输入x时，默认为0
   y = y or 0 -- 没有输入y时，默认为0
   z = z or 0 -- 没有输入z时，默认为0
@@ -20,15 +25,21 @@ function YcPosition:new (x, y, z)
   if type(x) == 'table' then
     return YcPosition:new(x.x, x.y, x.z)
   else
-    o = { x = x, y = y, z = z }
+    o = {
+      x = x,
+      y = y,
+      z = z
+    }
   end
   self.__index = self
   setmetatable(o, self)
   return o
 end
 
--- 加法
-function YcPosition:__add (pos)
+--- 加法
+---@param pos number | YcPosition 数字或位置对象
+---@return YcPosition | nil 位置对象，nil表示参数错误
+function YcPosition:__add(pos)
   if type(pos) == 'number' then -- 如果是加数字
     return YcPosition:new(self.x + pos, self.y + pos, self.z + pos)
   elseif YcPosition.isPosition(pos) then -- 如果是加位置
@@ -38,22 +49,26 @@ function YcPosition:__add (pos)
   end
 end
 
--- 减法
-function YcPosition:__sub (pos)
-  if type(pos) == 'number' then -- 如果是加数字
+--- 减法
+---@param pos number | YcPosition 数字或位置对象
+---@return YcPosition | nil 位置对象，nil表示参数错误
+function YcPosition:__sub(pos)
+  if type(pos) == 'number' then -- 如果是减数字
     return YcPosition:new(self.x - pos, self.y - pos, self.z - pos)
-  elseif YcPosition.isPosition(pos) then -- 如果是加位置
+  elseif YcPosition.isPosition(pos) then -- 如果是减位置
     return YcPosition:new(self.x - pos.x, self.y - pos.y, self.z - pos.z)
   else
     error('运算对象是' .. type(pos) .. ', 不是数字或位置')
   end
 end
 
--- 乘法
-function YcPosition:__mul (pos)
-  if type(pos) == 'number' then -- 如果是加数字
+--- 乘法
+---@param pos number | YcPosition 数字或位置对象
+---@return YcPosition | nil 位置对象，nil表示参数错误
+function YcPosition:__mul(pos)
+  if type(pos) == 'number' then -- 如果是乘数字
     return YcPosition:new(self.x * pos, self.y * pos, self.z * pos)
-  elseif YcPosition.isPosition(pos) then -- 如果是加位置
+  elseif YcPosition.isPosition(pos) then -- 如果是乘位置
     return YcPosition:new(self.x * pos.x, self.y * pos.y, self.z * pos.z)
   else
     error('运算对象是' .. type(pos) .. ', 不是数字或位置')
@@ -61,10 +76,12 @@ function YcPosition:__mul (pos)
 end
 
 -- 除法
-function YcPosition:__div (pos)
-  if type(pos) == 'number' then -- 如果是加数字
+---@param pos number | YcPosition 数字或位置对象
+---@return YcPosition | nil 位置对象，nil表示参数错误
+function YcPosition:__div(pos)
+  if type(pos) == 'number' then -- 如果是除以数字
     return YcPosition:new(self.x / pos, self.y / pos, self.z / pos)
-  elseif YcPosition.isPosition(pos) then -- 如果是加位置
+  elseif YcPosition.isPosition(pos) then -- 如果是除以位置
     return YcPosition:new(self.x / pos.x, self.y / pos.y, self.z / pos.z)
   else
     error('运算对象是' .. type(pos) .. ', 不是数字或位置')
@@ -72,7 +89,9 @@ function YcPosition:__div (pos)
 end
 
 -- 等于，这里判断两个位置是否在同一个格子里
-function YcPosition:__eq (pos)
+---@param pos any 位置对象或其他
+---@return boolean 是否在同一个格子里
+function YcPosition:__eq(pos)
   if YcPosition.isPosition(pos) then -- 如果是位置对象
     return self:floor():equals(pos:floor())
   else
@@ -80,28 +99,38 @@ function YcPosition:__eq (pos)
   end
 end
 
--- 自定义表的输出内容
-function YcPosition:__tostring ()
+--- 自定义表的输出内容
+---@return string
+function YcPosition:__tostring()
   return self:toString()
 end
 
--- 向下取整
-function YcPosition:floor ()
+--- 各个分量向下取整
+---@return YcPosition
+function YcPosition:floor()
   return YcPosition:new(math.floor(self.x), math.floor(self.y), math.floor(self.z))
 end
 
--- 向上取整
-function YcPosition:ceil ()
+--- 各个分量向上取整
+---@return YcPosition
+function YcPosition:ceil()
   return YcPosition:new(math.ceil(self.x), math.ceil(self.y), math.ceil(self.z))
 end
 
--- 获取x、y、z
-function YcPosition:get ()
+--- 获取x、y、z
+---@return number x位置
+---@return number y位置
+---@return number z位置
+function YcPosition:get()
   return self.x, self.y, self.z
 end
 
--- 设置x、y、z
-function YcPosition:set (x, y, z)
+--- 设置x、y、z
+---@param x number x位置
+---@param y number y位置
+---@param z number z位置
+---@return nil
+function YcPosition:set(x, y, z)
   if type(x) == 'number' then
     self.x = x
   end
@@ -116,8 +145,9 @@ function YcPosition:set (x, y, z)
   end
 end
 
--- 是否相等
-function YcPosition:equals (pos)
+--- 判断是否相等。包括类型与各个分量的值
+---@param pos any
+function YcPosition:equals(pos)
   if YcPosition.isPosition(pos) then -- 如果是位置对象
     return pos.x == self.x and pos.y == self.y and pos.z == self.z
   else
@@ -125,13 +155,16 @@ function YcPosition:equals (pos)
   end
 end
 
--- 转换为字符串
-function YcPosition:toString ()
+--- 转换为字符串
+---@return string
+function YcPosition:toString()
   return '{x=' .. self.x .. ',y=' .. self.y .. ',z=' .. self.z .. '}'
 end
 
----
-function YcPosition:equalBlockPos (pos)
+--- 是否与方块位置相同
+---@param pos table{ x: number, y: number, z: number }
+---@return boolean 是否相同
+function YcPosition:equalBlockPos(pos)
   if type(pos) ~= 'table' then
     return false
   end
@@ -140,11 +173,17 @@ function YcPosition:equalBlockPos (pos)
   return x1 == x2 and y1 == y2 and z1 == z2
 end
 
--- 从右起每四位代表一个坐标值（负数有问题）
-function YcPosition:toNumber ()
-  return self.x * 100000000 + self.y * 10000 + self.z
+--- 因为目前坐标分量最大只有四位，所以规定从右起每五位代表一个坐标值，与10000相加
+---@return number
+function YcPosition:toNumber()
+  local x = self.x * math.pow(10, 10) + math.pow(10, 14)
+  local y = self.y * math.pow(10, 5) + math.pow(10, 9)
+  local z = self.z + math.pow(10, 4)
+  return x + y + z
 end
 
-function YcPosition:toSimpleString ()
+--- 转换为各分量简单拼接后的字符串
+---@return string
+function YcPosition:toSimpleString()
   return StringHelper.concat(self.x, ',', self.y, ',', self.z)
 end

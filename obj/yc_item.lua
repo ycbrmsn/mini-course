@@ -1,14 +1,12 @@
---[[ 道具类 v1.0.0
-  create by 莫小仙 on 2022-06-19
-]]
+--- 道具类 v1.0.1
+--- created by 莫小仙 on 2022-06-19
+--- last modified on 2023-08-06
 YcItem = {}
 
---[[
-  实例化
-  @param  {table} o 包含道具的基本属性
-  @return {YcItem} 道具对象
-]]
-function YcItem:new (o)
+--- 实例化
+---@param o table 包含道具的基本属性
+---@return YcItem 道具对象
+function YcItem:new(o)
   o = o or {}
   self.__index = self
   setmetatable(o, self)
@@ -18,113 +16,107 @@ function YcItem:new (o)
   return o
 end
 
---[[
-  拿起道具(手上)
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:pickUp (objid)
+--- 拿起道具(手上)
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@return nil
+function YcItem:pickUp(objid)
   -- body
 end
 
---[[
-  放下道具(手上)
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:putDown (objid)
+--- 放下道具(手上)
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@return nil
+function YcItem:putDown(objid)
   -- body
 end
 
---[[
-  新增道具
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:addItem (objid, itemnum)
+--- 新增道具
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param itemnum integer 道具数量
+---@return nil
+function YcItem:addItem(objid, itemnum)
   -- body
 end
 
---[[
-  使用道具
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:useItem (objid, itemnum)
+--- 使用道具
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param itemnum integer 道具数量
+---@return nil
+function YcItem:useItem(objid, itemnum)
   -- body
 end
 
---[[
-  消耗道具
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:consumeItem (objid, itemnum)
+--- 消耗道具
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param itemnum integer 道具数量
+---@return nil
+function YcItem:consumeItem(objid, itemnum)
   -- body
 end
 
---[[
-  丢弃道具
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:discardItem (objid, itemnum)
+--- 丢弃道具
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param itemnum integer 道具数量
+---@return nil
+function YcItem:discardItem(objid, itemnum)
   -- body
 end
 
---[[
-  选择道具
-  @param  {integer} objid 迷你号/生物id
-  @return {nil}
-]]
-function YcItem:selectItem (objid)
+--- 选择道具
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param itemnum integer 道具数量
+---@return nil
+function YcItem:selectItem(objid)
   -- body
 end
 
---[[
-  使用技能
-  @param  {integer} objid 迷你号/生物id
-  @param  {integer} index 技能序号，从1开始。当一件道具设置了多个技能时，则需要判断技能序号
-  @return {nil}
-]]
-function YcItem:useSkill (objid, index)
+--- 使用技能
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param index integer 技能序号，从1开始。当一件道具设置了多个技能时，则需要判断技能序号
+---@return nil
+function YcItem:useSkill(objid, index)
   -- body
 end
 
---[[
-  手持道具点击方块
-  @param  {integer} objid 迷你号/生物id
-  @param  {integer} blockid 方块id
-  @param  {number} x 方块位置x
-  @param  {number} y 方块位置y
-  @param  {number} z 方块位置z
-  @return {nil}
-]]
-function YcItem:clickBlock (objid, blockid, x, y, z)
+--- 手持道具点击方块
+--- 接口，具体实现在继承的类中
+---@param objid integer 迷你号/生物id
+---@param blockid integer 方块id
+---@param x number 方块位置x
+---@param y number 方块位置y
+---@param z number 方块位置z
+---@return nil
+function YcItem:clickBlock(objid, blockid, x, y, z)
   -- body
 end
 
---[[
-  手持道具攻击命中
-  @param  {integer} objid 发动攻击对象id
-  @param  {integer} toobjid 被命中对象id
-  @return {nil}
-]]
-function YcItem:attackHit (objid, toobjid)
+--- 手持道具攻击命中
+--- 接口，具体实现在继承的类中
+---@param objid integer 发动攻击对象id
+---@param toobjid integer 被命中对象id
+---@return nil
+function YcItem:attackHit(objid, toobjid)
   -- body
 end
 
---[[
-  该道具相关的投掷物命中。如道具枪射出的子弹命中
-  @param  {table} projectileid 投掷物id
-  @param  {integer} objid 投掷物所属对象id，即表示投掷物是谁的
-  @param  {integer} toobjid 被命中对象id
-  @param  {integer} blockid 方块id
-  @param  {number} x 命中的位置x
-  @param  {number} y 命中的位置y
-  @param  {number} z 命中的位置z
-  @return {nil}
-]]
-function YcItem:projectileHit (projectileid, objid, toobjid, blockid, x, y, z)
+--- 该道具相关的投掷物命中。如道具枪射出的子弹命中
+--- 接口，具体实现在继承的类中
+---@param projectileid integer 投掷物id
+---@param objid integer 投掷物所属对象id，即表示投掷物是谁的
+---@param toobjid integer 被命中对象id
+---@param blockid integer 方块id
+---@param x number 命中的位置x
+---@param y number 命中的位置y
+---@param z number 命中的位置z
+---@return nil
+function YcItem:projectileHit(projectileid, objid, toobjid, blockid, x, y, z)
   -- body
 end

@@ -1,37 +1,45 @@
---[[ 三维向量类 v1.1.1
-  create by 莫小仙 on 2022-05-15
-  last modified on 2022-08-14
-]]
+--- 三维向量类 v1.1.2
+--- created by 莫小仙 on 2022-05-15
+--- last modified on 2023-08-06
 YcVector3 = {
   TYPE = 'YC_VECTOR3'
 }
 
---[[
-  是否是三维向量
-  @param  {any} obj 任意类型
-  @return {boolean} 是否是三维向量
-]]
-function YcVector3.isVector3 (obj)
+--- 判断是否是三维向量对象
+---@param obj any 任意类型
+---@return boolean 是否是三维向量对象
+function YcVector3.isVector3(obj)
   return not not (obj and obj.TYPE and obj.TYPE == YcVector3.TYPE)
 end
 
---[[
-  构造子类 参数：六个number/三个number/两个table/一个table
-  @param  {number | table} x1 数值或表
-  @param  {number | table | nil} y1 数值或表
-  @param  {number | nil} z1 数值或nil
-  @param  {number | nil} x2 数值或nil
-  @param  {number | nil} y2 数值或nil
-  @param  {number | nil} z2 数值或nil
-  @return {YcVector3 | nil} 三维向量，nil表示参数不合法
-]]
-function YcVector3:new (x1, y1, z1, x2, y2, z2)
+--- 实例化
+---@param x1 number | table
+---@param y1 number | table | nil
+---@param z1 number | nil
+---@param x2 number | nil
+---@param y2 number | nil
+---@param z2 number | nil
+---@return YcVector3 | nil 三维向量，nil表示参数不合法
+------------重载---------
+---@overload fun(t: table) : YcVector3 -> (t.x, t.y, tz)
+---@overload fun(t1: table, t2: table) : YcVector3 -> (t2.x - t1.x, t2.y - t1.y, t2.z - t1.z)
+---@overload fun(x: number, y: number, z: number) : YcVector3 -> (x, y, z)
+---@overload fun(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number) : YcVector3 -> (x2 - x1, y2 - y1, z2 - z1)
+function YcVector3:new(x1, y1, z1, x2, y2, z2)
   local o
-  if type(x2) == 'number' and type(y2) == 'number' and type(z2) == 'number'
-    and type(x1) == 'number' and type(y1) == 'number' and type(z1) == 'number' then -- 6个数值
-    o = { x = x2 - x1, y = y2 - y1, z = z2 - z1 }
+  if type(x2) == 'number' and type(y2) == 'number' and type(z2) == 'number' and type(x1) == 'number' and type(y1) ==
+    'number' and type(z1) == 'number' then -- 6个数值
+    o = {
+      x = x2 - x1,
+      y = y2 - y1,
+      z = z2 - z1
+    }
   elseif type(x1) == 'number' and type(y1) == 'number' and type(z1) == 'number' then -- 3个数值
-    o = { x = x1, y = y1, z = z1 }
+    o = {
+      x = x1,
+      y = y1,
+      z = z1
+    }
   elseif type(y1) == 'table' and type(x1) == 'table' then -- 2个表
     return YcVector3:new(x1.x, x1.y, x1.z, y1.x, y1.y, y1.z)
   elseif type(x1) == 'table' then -- 1个表
@@ -54,12 +62,10 @@ YcVector3.down = YcVector3:new(0, -1, 0) -- 对应下方向
 YcVector3.forward = YcVector3:new(0, 0, 1) -- 对应北方向
 YcVector3.back = YcVector3:new(0, 0, -1) -- 对应南方向
 
---[[
-  加法
-  @param  {number | YcVector3} vec 数值或三维向量
-  @return {YcVector3 | nil} 向量，nil表示加数类型错误
-]]
-function YcVector3:__add (vec)
+--- 加法
+---@param vec number | YcVector3 数值或三维向量
+---@return YcVector3 | nil 三维向量，nil表示参数错误
+function YcVector3:__add(vec)
   if type(vec) == 'number' then -- 如果是加数字
     return YcVector3:new(self.x + vec, self.y + vec, self.z + vec)
   elseif YcVector3.isVector3(vec) then -- 如果是加向量
@@ -69,12 +75,10 @@ function YcVector3:__add (vec)
   end
 end
 
---[[
-  减法
-  @param  {number | YcVector3} vec 数值或三维向量
-  @return {YcVector3 | nil} 向量，nil表示减数类型错误
-]]
-function YcVector3:__sub (vec)
+--- 减法
+---@param vec number | YcVector3 数值或三维向量
+---@return YcVector3 | nil 三维向量，nil表示参数错误
+function YcVector3:__sub(vec)
   if type(vec) == 'number' then -- 如果是减数字
     return YcVector3:new(self.x - vec, self.y - vec, self.z - vec)
   elseif YcVector3.isVector3(vec) then -- 如果是减向量
@@ -84,12 +88,10 @@ function YcVector3:__sub (vec)
   end
 end
 
---[[
-  乘法
-  @param  {number | YcVector3} vec 数值或三维向量
-  @return {YcVector3 | nil} 向量，nil表示乘数类型错误
-]]
-function YcVector3:__mul (vec)
+--- 乘法
+---@param vec number | YcVector3 数值或三维向量
+---@return YcVector3 | nil 三维向量，nil表示参数错误
+function YcVector3:__mul(vec)
   if type(vec) == 'number' then -- 如果是乘数字
     return YcVector3:new(self.x * vec, self.y * vec, self.z * vec)
   elseif YcVector3.isVector3(vec) then -- 如果是乘向量
@@ -99,12 +101,10 @@ function YcVector3:__mul (vec)
   end
 end
 
---[[
-  除法
-  @param  {number | YcVector3} vec 数值或三维向量
-  @return {YcVector3 | nil} 向量，nil表示除数类型错误
-]]
-function YcVector3:__div (vec)
+--- 除法
+---@param vec number | YcVector3 数值或三维向量
+---@return YcVector3 | nil 三维向量，nil表示参数错误
+function YcVector3:__div(vec)
   if type(vec) == 'number' then -- 如果是除以数字
     return YcVector3:new(self.x / vec, self.y / vec, self.z / vec)
   elseif YcVector3.isVector3(vec) then -- 如果是除以向量
@@ -114,12 +114,10 @@ function YcVector3:__div (vec)
   end
 end
 
---[[
-  等于
-  @param  {any} vec 任意类型
-  @return {boolean} 是否相等
-]]
-function YcVector3:__eq (vec)
+--- 等于
+---@param vec any 任意类型
+---@return boolean 是否相等
+function YcVector3:__eq(vec)
   if YcVector3.isVector3(vec) then -- 如果是向量对象
     return vec.x == self.x and vec.y == self.y and vec.z == self.z
   else
@@ -127,20 +125,16 @@ function YcVector3:__eq (vec)
   end
 end
 
---[[
-  自定义表的输出内容
-  @return {string} 输出内容
-]]
-function YcVector3:__tostring ()
+--- 自定义表的输出内容
+---@return string 输出内容
+function YcVector3:__tostring()
   return self:toString()
 end
 
---[[
-  点乘
-  @param  {YcVector3} vec 三维向量
-  @return {number | nil} 数值，nil表示参数不是三维向量 
-]]
-function YcVector3:dot (vec)
+--- 点乘
+---@param vec YcVector3 三维向量
+---@return number | nil 数值，nil表示参数不是三维向量
+function YcVector3:dot(vec)
   if YcVector3.isVector3(vec) then
     return self.x * vec.x + self.y * vec.y + self.z * vec.z
   else
@@ -148,33 +142,27 @@ function YcVector3:dot (vec)
   end
 end
 
---[[
-  叉乘
-  @param  {YcVector3} vec 三维向量
-  @return {YcVector3 | nil} 三维向量，nil表示参数不是三维向量
-]]
-function YcVector3:cross (vec)
+--- 叉乘
+---@param vec YcVector3 三维向量
+---@return YcVector3 | nil 三维向量，nil表示参数不是三维向量
+function YcVector3:cross(vec)
   if YcVector3.isVector3(vec) then
-    return YcVector3:new(self.y * vec.z - self.z * vec.y,
-      self.z * vec.x - self.x * vec.z, self.x * vec.y - self.y * vec.x)
+    return YcVector3:new(self.y * vec.z - self.z * vec.y, self.z * vec.x - self.x * vec.z,
+      self.x * vec.y - self.y * vec.x)
   else
     error('叉乘对象是' .. type(vec) .. ', 不是三维向量')
   end
 end
 
---[[
-  获取向量长度
-  @return {number} 长度
-]]
-function YcVector3:length ()
+--- 获取向量长度
+---@return number 长度
+function YcVector3:length()
   return math.sqrt(math.pow(self.x, 2) + math.pow(self.y, 2) + math.pow(self.z, 2))
 end
 
---[[
-  获取归一化向量
-  @return {YcVector3} 单位向量
-]]
-function YcVector3:normalize ()
+--- 获取归一化向量
+---@return YcVector3 单位向量
+function YcVector3:normalize()
   local length = self:length()
   if length == 0 then -- 长度为0
     return YcVector3:new(0, 0, 0)
@@ -183,32 +171,29 @@ function YcVector3:normalize ()
   end
 end
 
---[[
-  是否是零向量
-  @return {boolean} 是否零向量
-]]
-function YcVector3:isZero ()
+--- 判断是否是零向量
+---@return boolean 是否零向量
+function YcVector3:isZero()
   return self.x == 0 and self.y == 0 and self.z == 0
 end
 
---[[
-  获取x、y、z
-  @return {number} x值
-  @return {number} y值
-  @return {number} z值
-]]
-function YcVector3:get ()
+--- 获取x、y、z
+---@return number x值
+---@return number y值
+---@return number z值
+function YcVector3:get()
   return self.x, self.y, self.z
 end
 
---[[
-  设置x、y、z
-  @param  {number | table} x 数值或table
-  @param  {number | nil} y 数值或nil
-  @param  {number | nil} z 数值或nil
-  @return {nil}
-]]
-function YcVector3:set (x, y, z)
+--- 设置x、y、z
+---@param x number | table
+---@param y number | nil
+---@param z number | nil
+---@return nil
+------------重载---------
+---@overload fun(t: table) : nil
+---@overload fun(x: number, y: number, z: number) : nil
+function YcVector3:set(x, y, z)
   if type(x) == 'table' then
     self:set(x.x, x.y, x.z)
   else
@@ -224,10 +209,8 @@ function YcVector3:set (x, y, z)
   end
 end
 
---[[
-  转换为字符串
-  @return {string} 字符串
-]]
-function YcVector3:toString ()
+--- 转换为字符串
+---@return string 字符串
+function YcVector3:toString()
   return '{x=' .. self.x .. ',y=' .. self.y .. ',z=' .. self.z .. '}'
 end

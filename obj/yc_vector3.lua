@@ -1,6 +1,7 @@
 --- 三维向量类 v1.1.2
 --- created by 莫小仙 on 2022-05-15
 --- last modified on 2023-08-06
+---@class YcVector3 三维向量
 YcVector3 = {
   TYPE = 'YC_VECTOR3'
 }

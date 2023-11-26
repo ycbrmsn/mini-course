@@ -1,6 +1,7 @@
 --- 二维向量类 v1.0.2
 --- created by 莫小仙 on 2022-07-31
 --- last modified on 2023-08-06
+---@class YcVector2 二维向量
 YcVector2 = {
   TYPE = 'YC_VECTOR2'
 }

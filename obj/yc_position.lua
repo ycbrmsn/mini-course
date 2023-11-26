@@ -1,6 +1,7 @@
 --- 位置类 v1.0.3
 --- created by 莫小仙 on 2022-05-14
 --- last modified on 2023-08-06
+---@class YcPosition 位置
 YcPosition = {
   TYPE = 'YC_POSITION'
 }

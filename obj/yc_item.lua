@@ -1,6 +1,7 @@
 --- 道具类 v1.0.1
 --- created by 莫小仙 on 2022-06-19
 --- last modified on 2023-08-06
+---@class YcItem 道具
 YcItem = {}
 
 --- 实例化

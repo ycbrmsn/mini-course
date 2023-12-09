@@ -17,18 +17,17 @@ function YcVector3.isVector3(obj)
 end
 
 --- 实例化
----@param x1 number | table
----@param y1 number | table | nil
----@param z1 number | nil
----@param x2 number | nil
----@param y2 number | nil
----@param z2 number | nil
+---@param x1 number
+---@param y1 number
+---@param z1 number
+---@param x2 number
+---@param y2 number
+---@param z2 number
 ---@return YcVector3 | nil 三维向量，nil表示参数不合法
-------------重载---------
+---------重载---------
 ---@overload fun(t: table) : YcVector3 -> (t.x, t.y, tz)
 ---@overload fun(t1: table, t2: table) : YcVector3 -> (t2.x - t1.x, t2.y - t1.y, t2.z - t1.z)
 ---@overload fun(x: number, y: number, z: number) : YcVector3 -> (x, y, z)
----@overload fun(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number) : YcVector3 -> (x2 - x1, y2 - y1, z2 - z1)
 function YcVector3:new(x1, y1, z1, x2, y2, z2)
   local o
   if type(x2) == 'number' and type(y2) == 'number' and type(z2) == 'number' and type(x1) == 'number' and type(y1) ==
@@ -67,8 +66,10 @@ YcVector3.forward = YcVector3:new(0, 0, 1) -- 对应北方向
 YcVector3.back = YcVector3:new(0, 0, -1) -- 对应南方向
 
 --- 加法
----@param vec number | YcVector3 数值或三维向量
+---@param vec YcVector3 三维向量
 ---@return YcVector3 | nil 三维向量，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector3 | nil
 function YcVector3:__add(vec)
   if type(vec) == 'number' then -- 如果是加数字
     return YcVector3:new(self.x + vec, self.y + vec, self.z + vec)
@@ -80,8 +81,10 @@ function YcVector3:__add(vec)
 end
 
 --- 减法
----@param vec number | YcVector3 数值或三维向量
+---@param vec YcVector3 三维向量
 ---@return YcVector3 | nil 三维向量，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector3 | nil
 function YcVector3:__sub(vec)
   if type(vec) == 'number' then -- 如果是减数字
     return YcVector3:new(self.x - vec, self.y - vec, self.z - vec)
@@ -93,8 +96,10 @@ function YcVector3:__sub(vec)
 end
 
 --- 乘法
----@param vec number | YcVector3 数值或三维向量
+---@param vec YcVector3 三维向量
 ---@return YcVector3 | nil 三维向量，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector3 | nil
 function YcVector3:__mul(vec)
   if type(vec) == 'number' then -- 如果是乘数字
     return YcVector3:new(self.x * vec, self.y * vec, self.z * vec)
@@ -106,8 +111,10 @@ function YcVector3:__mul(vec)
 end
 
 --- 除法
----@param vec number | YcVector3 数值或三维向量
+---@param vec YcVector3 三维向量
 ---@return YcVector3 | nil 三维向量，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector3 | nil
 function YcVector3:__div(vec)
   if type(vec) == 'number' then -- 如果是除以数字
     return YcVector3:new(self.x / vec, self.y / vec, self.z / vec)
@@ -190,13 +197,12 @@ function YcVector3:get()
 end
 
 --- 设置x、y、z
----@param x number | table
----@param y number | nil
----@param z number | nil
+---@param x number
+---@param y number
+---@param z number
 ---@return nil
-------------重载---------
+---------重载---------
 ---@overload fun(t: table) : nil
----@overload fun(x: number, y: number, z: number) : nil
 function YcVector3:set(x, y, z)
   if type(x) == 'table' then
     self:set(x.x, x.y, x.z)

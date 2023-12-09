@@ -16,16 +16,15 @@ function YcVector2.isVector2(obj)
 end
 
 --- 实例化
----@param x1 number | table
----@param y1 number | table | nil
----@param x2 number | nil
----@param y2 number | nil
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
 ---@return YcVector2 | nil 二位向量对象，nil表示参数不合法
-------------重载---------
+---------重载---------
 ---@overload fun(t: table) : YcVector2 -> (t.x, t.y)
 ---@overload fun(t1: table, t2: table) : YcVector2 -> (t2.x - t1.x, t2.y - t1.y)
 ---@overload fun(x: number, y: number) : YcVector2 -> (x, y)
----@overload fun(x1: number, y1: number, x2: number, y2: number) : YcVector2 -> (x2 - x1, y2 - y1)
 function YcVector2:new(x1, y1, x2, y2)
   local o
   if type(x2) == 'number' and type(y2) == 'number' and type(x1) == 'number' and type(y1) == 'number' then -- 4个数值
@@ -59,8 +58,10 @@ YcVector2.up = YcVector2:new(0, 1) -- 对应上方向
 YcVector2.down = YcVector2:new(0, -1) -- 对应下方向
 
 --- 加法
----@param vec number | YcVector2 数字或二位向量对象
+---@param vec YcVector2 二位向量对象
 ---@return YcVector2 | nil 二位向量对象，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector2 | nil
 function YcVector2:__add(vec)
   if type(vec) == 'number' then -- 如果是加数字
     return YcVector2:new(self.x + vec, self.y + vec)
@@ -72,8 +73,10 @@ function YcVector2:__add(vec)
 end
 
 --- 减法
----@param vec number | YcVector2 数字或二位向量对象
+---@param vec YcVector2 二位向量对象
 ---@return YcVector2 | nil 二位向量对象，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector2 | nil
 function YcVector2:__sub(vec)
   if type(vec) == 'number' then -- 如果是减数字
     return YcVector2:new(self.x - vec, self.y - vec)
@@ -85,8 +88,10 @@ function YcVector2:__sub(vec)
 end
 
 --- 乘法
----@param vec number | YcVector2 数字或二位向量对象
+---@param vec YcVector2 二位向量对象
 ---@return YcVector2 | nil 二位向量对象，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector2 | nil
 function YcVector2:__mul(vec)
   if type(vec) == 'number' then -- 如果是乘数字
     return YcVector2:new(self.x * vec, self.y * vec)
@@ -98,8 +103,10 @@ function YcVector2:__mul(vec)
 end
 
 --- 除法
----@param vec number | YcVector2 数字或二位向量对象
+---@param vec YcVector2 二位向量对象
 ---@return YcVector2 | nil 二位向量对象，nil表示参数错误
+---------重载---------
+---@overload fun(num: number) : YcVector2 | nil
 function YcVector2:__div(vec)
   if type(vec) == 'number' then -- 如果是除以数字
     return YcVector2:new(self.x / vec, self.y / vec)
@@ -180,12 +187,11 @@ function YcVector2:get()
 end
 
 --- 设置x、y
----@param x number | table
----@param y number | nil
+---@param x number
+---@param y number
 ---@return nil
-------------重载---------
+---------重载---------
 ---@overload fun(t: table) : nil
----@overload fun(x: number, y: number) : nil
 function YcVector2:set(x, y)
   if type(x) == 'table' then
     self:set(x.x, x.y)

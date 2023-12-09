@@ -182,12 +182,6 @@ function YcPositionHelper.getDistance(pos1, pos2)
   return vec3:length()
 end
 
---[[
-  两点水平方向上的距离
-  @param  {table} pos1 第一个点位置
-  @param  {table} pos2 第二个点位置
-  @return {number} 距离
-]]
 --- 获取两点水平方向上的距离
 ---@param pos1 table{ x: number, y: number, z: number } 第一个点位置
 ---@param pos2 table{ x: number, y: number, z: number } 第二个点位置

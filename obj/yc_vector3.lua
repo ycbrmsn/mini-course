@@ -2,6 +2,9 @@
 --- created by 莫小仙 on 2022-05-15
 --- last modified on 2023-08-06
 ---@class YcVector3 三维向量
+---@field x number x坐标
+---@field y number y坐标
+---@field z number z坐标
 YcVector3 = {
   TYPE = 'YC_VECTOR3'
 }

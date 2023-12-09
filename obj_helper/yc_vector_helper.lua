@@ -57,11 +57,6 @@ function YcVectorHelper.getActorFaceYaw(vec3)
   return tempAngle
 end
 
---[[
-  获取玩家水平旋转角度。忽略y方向，计算与正北方向向量夹角（仅当使用第一人称相关视角）
-  @param  {table} vec3 朝向
-  @return {number} 角度
-]]
 --- 获取玩家水平旋转角度。忽略y方向，计算与正北方向向量夹角（仅当使用第一人称相关视角）
 ---@param vec3 table{ x: number, y: number, z: number } 朝向
 ---@return number 角度

@@ -2,6 +2,8 @@
 --- created by 莫小仙 on 2022-07-31
 --- last modified on 2023-08-06
 ---@class YcVector2 二维向量
+---@field x number x坐标
+---@field y number y坐标
 YcVector2 = {
   TYPE = 'YC_VECTOR2'
 }

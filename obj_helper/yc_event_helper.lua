@@ -3,7 +3,14 @@
 --- last modified on 2023-08-05
 YcEventHelper = {
   func = {}, -- { [eventname] = { f1, f2, f3, ... } }
-  alias = {} -- { [eventAlias] = eventname }
+  alias = {}, -- { [eventAlias] = eventname }
+  -- 内置自定义事件
+  CUSTOM_EVENT = {
+    PLAYER_GAIN_EXP = 'Player.GainExp', -- 玩家获得经验
+    PLAYER_DEFEAT_TASK_ACTOR = 'Player.DefeatTaskActor', -- 玩家击败任务生物
+    PLAYER_ADD_TASK_ITEM = 'Player.AddTaskItem', -- 玩家获得任务道具
+    PLAYER_LOSE_TASK_ITEM = 'Player.LoseTaskItem' -- 玩家失去任务道具
+  }
 }
 
 --- 通过字符串添加事件别名，参数格式为：别名=事件名&别名=事件名
@@ -80,11 +87,14 @@ end
 -- 初始化
 
 -- 事件名，对应所有的游戏事件。如果游戏事件有所改变，则随之调整
-local eventnames = { -- 世界事件（4）
-'Weather.Changed', 'Backpack.ItemTakeOut', 'Backpack.ItemPutIn', 'Backpack.ItemChange', -- 游戏逻辑（13）
+local eventnames = {
+-- 世界事件（4）
+'Weather.Changed', 'Backpack.ItemTakeOut', 'Backpack.ItemPutIn', 'Backpack.ItemChange',
+-- 游戏逻辑（13）
 'Game.AnyPlayer.Defeat', 'Game.AnyPlayer.EnterGame', 'Game.AnyPlayer.LeaveGame', 'Game.AnyPlayer.ReadStage',
 'Game.AnyPlayer.Victory', 'Game.End', 'Game.Hour', 'Game.Load', 'Game.Run', 'Game.RunTime', 'Game.Start',
-'Game.TimeOver', 'minitimer.change', -- 玩家事件（40）
+'Game.TimeOver', 'minitimer.change',
+-- 玩家事件（40）
 'Player.AddBuff', 'Player.AddItem', 'Player.AreaIn', 'Player.AreaOut', 'Player.Attack', 'Player.AttackHit',
 'Player.BackPackChange', 'Player.BeHurt', 'Player.ChangeAttr', 'Player.ClickActor', 'Player.ClickBlock',
 'Player.Collide', 'Player.ConsumeItem', 'Player.DamageActor', 'Player.DefeatActor', 'Player.Die', 'Player.DiscardItem',
@@ -92,15 +102,19 @@ local eventnames = { -- 世界事件（4）
 'Player.InputKeyDown', 'Player.InputKeyOnPress', 'Player.InputKeyUp', 'Player.JoinTeam', 'Player.LevelModelUpgrade',
 'Player.MotionStateChange', 'Player.MountActor', 'Player.MoveOneBlockSize', 'Player.NewInputContent',
 'Player.PickUpItem', 'Player.PlayAction', 'Player.RemoveBuff', 'Player.Revive', 'Player.SelectShortcut',
-'Player.ShortcutChange', 'Player.UseItem', 'QQMusic.PlayBegin', -- 生物事件（21）
+'Player.ShortcutChange', 'Player.UseItem', 'QQMusic.PlayBegin',
+-- 生物事件（21）
 'Actor.AddBuff', 'Actor.AreaIn', 'Actor.AreaOut', 'Actor.Attack', 'Actor.AttackHit', 'Actor.BeGreetedBy',
 'Actor.BeHurt', 'Actor.Beat', 'Actor.ChangeAttr', 'Actor.ChangeMotion', 'Actor.Collide', 'Actor.Create', 'Actor.Damage',
 'Actor.Die', 'Actor.InteractEvent', 'Actor.NewBeHurt', 'Actor.Projectile.Hit', 'Actor.RemoveBuff', 'Actor.ReqHelp',
-'Actor.VillageBindPosChange', 'Actor.VillagerFlagChange', -- 方块事件（9）
+'Actor.VillageBindPosChange', 'Actor.VillagerFlagChange',
+-- 方块事件（9）
 'Block.Add', 'Block.DestroyBy', 'Block.Dig.Begin', 'Block.Dig.Cancel', 'Block.Dig.End', 'Block.Fertilize',
-'Block.PlaceBy', 'Block.Remove', 'Block.Trigger', -- 道具事件（7）
+'Block.PlaceBy', 'Block.Remove', 'Block.Trigger',
+-- 道具事件（7）
 'DropItem.AreaIn', 'DropItem.AreaOut', 'Item.Disappear', 'Item.Pickup', 'Missile.AreaIn', 'Missile.AreaOut',
-'Missile.Create', -- 特效事件（4）
+'Missile.Create',
+-- 特效事件（4）
 'Particle.Mob.OnCreate', 'Particle.Player.OnCreate', 'Particle.Pos.OnCreate', 'Particle.Projectile.OnCreate',
 -- UI事件（4）
 'UI.Button.Click', 'UI.Hide', 'UI.Show', 'UI.LostFocus'}

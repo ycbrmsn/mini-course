@@ -1,20 +1,23 @@
---- 数组类 v1.0.0
+--- 数组类 v1.0.1
 --- created by 莫小仙 on 2023-12-04
+--- last modified on 2023-12-09
 ---@class YcArray 数组对象
 ---@field array table 数组内容
----@field type "'YcArray'" 类型
-YcArray = {}
+---@field TYPE "'YC_ARRAY'" 类型
+YcArray = {
+  TYPE = 'YC_ARRAY'
+}
 
 --- 判断是否是一个数组
 ---@param o any 需要判断的元素
 ---@return boolean 是否是数组
 function YcArray.isArray(o)
-  return type(o) == 'table' and o.type == 'YcArray'
+  return type(o) == 'table' and o.TYPE == 'YC_ARRAY'
 end
 
 --- 根据对象创建数组
 ---@param obj string | table 有长度的table或有length属性的table都行
----@param f "fun(currentValue: any, index: integer, array: YcArray): any" | nil 回调函数
+---@param f nil | fun(currentValue: any, index: integer, array: YcArray): any 回调函数
 ---@return YcArray 新数组
 function YcArray.from(obj, f)
   local t = type(obj)
@@ -55,7 +58,6 @@ end
 function YcArray:new(array)
   array = type(array) == 'table' and array or {} -- 如果array不是table，则赋值为空数组
   local obj = {
-    type = 'YcArray',
     array = array
   }
   self.__index = self
@@ -159,16 +161,18 @@ end
 ---@vararg YcArray 需要拼接的数组
 ---@return YcArray 连接后的新数组
 function YcArray:concat(...)
-  local num = select('#', ...)
   local index = 1
-  local array = self:reduce(function (total, item)
+  -- 包含当前数组所有元素的一个数组
+  local array = self:reduce(function(total, item)
     total[index] = item
     index = index + 1
     return total
   end, {})
+  -- 需要拼接的其他数组
+  local num = select('#', ...)
   for i = 1, num do
     local arr = select(i, ...)
-    arr:forEach(function (item)
+    arr:forEach(function(item)
       array[index] = item
       index = index + 1
     end)
@@ -187,8 +191,9 @@ function YcArray:forEach(f)
 end
 
 --- 循环生成一个新数组
----@param f fun(currentValue: any, index: integer, array: YcArray): any 回调函数
----@return YcArray 新数组
+---@generic T
+---@param f fun(currentValue: any, index: integer, array: YcArray): T 回调函数
+---@return YcArray<T> 新数组
 function YcArray:map(f)
   local array = YcArray:new()
   for i, v in ipairs(self.array) do
@@ -284,7 +289,7 @@ end
 ---@param value any 检测元素
 ---@return boolean 是否包含
 function YcArray:includes(value)
-  return self:some(function (item)
+  return self:some(function(item)
     return item == value
   end)
 end
@@ -344,7 +349,7 @@ function YcArray:fill(value, startIndex, endIndex)
   if endIndex < 0 then -- 负值则反向计数
     endIndex = num + endIndex + 1
   end
-  self:forEach(function (item, index)
+  self:forEach(function(item, index)
     if index >= startIndex and index <= endIndex then
       self.array[index] = value
     end
@@ -451,7 +456,7 @@ function YcArray:splice(index, howmany, ...)
 end
 
 --- 排序。默认升序
----@param f "fun(a: any, b: any): boolean" | nil
+---@param f nil | fun(a: any, b: any): boolean
 ---@return YcArray 原数组
 function YcArray:sort(f)
   table.sort(self.array, f)

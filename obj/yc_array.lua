@@ -3,7 +3,6 @@
 --- last modified on 2023-12-09
 ---@class YcArray 数组对象
 ---@field array table 数组内容
----@field TYPE "'YC_ARRAY'" 类型
 YcArray = {
   TYPE = 'YC_ARRAY'
 }
@@ -12,7 +11,7 @@ YcArray = {
 ---@param o any 需要判断的元素
 ---@return boolean 是否是数组
 function YcArray.isArray(o)
-  return type(o) == 'table' and o.TYPE == 'YC_ARRAY'
+  return type(o) == 'table' and o.TYPE == YcArray.TYPE
 end
 
 --- 根据对象创建数组

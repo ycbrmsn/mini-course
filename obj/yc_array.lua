@@ -1,8 +1,7 @@
 --- 数组类 v1.0.1
 --- created by 莫小仙 on 2023-12-04
---- last modified on 2023-12-09
+--- last modified on 2023-12-10
 ---@class YcArray 数组对象
----@field array table 数组内容
 YcArray = {
   TYPE = 'YC_ARRAY'
 }
@@ -31,7 +30,10 @@ function YcArray.from(obj, f)
       local array = {}
       if obj.length then -- 如果有length属性
         for i = 1, obj.length do
-          array[i] = obj[i] or ''
+          array[i] = obj[i]
+          if array[i] == nil then -- 如果是nil，则赋值为空字符串
+            array[i] = ''
+          end
         end
       else -- 没有length属性
         for i, v in ipairs(obj) do
@@ -45,7 +47,10 @@ function YcArray.from(obj, f)
   end
   if type(f) ~= 'function' then -- 如果f不是函数
     f = function(item)
-      return item or ''
+      if item == nil then
+        item = ''
+      end
+      return item
     end
   end
   return obj:map(f)
@@ -56,40 +61,15 @@ end
 ---@return YcArray 数组对象
 function YcArray:new(array)
   array = type(array) == 'table' and array or {} -- 如果array不是table，则赋值为空数组
-  local obj = {
-    array = array
-  }
   self.__index = self
-  setmetatable(obj, self)
-  return obj
-end
-
---- 获取数组中指定索引的元素
----@param index integer 索引
----@return any 数组元素
-function YcArray:get(index)
-  if self:checkIndex(index) then -- 如果索引正常
-    return self.array[index]
-  else -- 如果索引不正常
-    return nil
-  end
-end
-
---- 设置数组中指定索引的值
----@param index integer 索引
----@param value any 值
----@return YcArray 原数组
-function YcArray:set(index, value)
-  if self:checkIndex(index) then -- 如果索引正常
-    self.array[index] = value
-  end
-  return self
+  setmetatable(array, self)
+  return array
 end
 
 --- 获取数组长度
 ---@return integer 数组长度
 function YcArray:length()
-  return #self.array
+  return #self
 end
 
 --- 向数组尾部添加一个或多个元素
@@ -100,7 +80,7 @@ function YcArray:push(...)
   local len = self:length()
   for i = 1, num do
     local arg = select(i, ...)
-    self.array[len + i] = arg
+    self[len + i] = arg
   end
   return self
 end
@@ -108,7 +88,7 @@ end
 --- 删除数组尾部的一个元素
 ---@return any 删除的元素
 function YcArray:pop()
-  return table.remove(self.array)
+  return table.remove(self)
 end
 
 --- 向数组头部添加一个或多个元素
@@ -125,11 +105,11 @@ function YcArray:unshift(...)
   end
   -- 将原数组的元素依次放入新数组
   for i = 1, len do
-    array[num + i] = self.array[i]
+    array[num + i] = self[i]
   end
   -- 覆盖原数组
   for i, v in ipairs(array) do
-    self.array[i] = array[i]
+    self[i] = array[i]
   end
   return self
 end
@@ -137,7 +117,7 @@ end
 --- 删除数组的第一个元素
 ---@return any 删除的元素
 function YcArray:shift()
-  return table.remove(self.array, 1)
+  return table.remove(self, 1)
 end
 
 --- 向数组中插入元素
@@ -145,7 +125,7 @@ end
 ---@param value any | nil 插入的元素。nil表示pos处传的插入的元素
 ---@return YcArray 原数组
 function YcArray:insert(...)
-  table.insert(self.array, ...)
+  table.insert(self, ...)
   return self
 end
 
@@ -153,7 +133,7 @@ end
 ---@param index integer | nil 删除元素的索引。nil表示删除最后一个元素
 ---@return any 删除的元素
 function YcArray:remove(...)
-  return table.remove(self.array, ...)
+  return table.remove(self, ...)
 end
 
 --- 连接两个或多个数组。不会改变原数组
@@ -183,7 +163,7 @@ end
 ---@param f fun(currentValue: any, index: integer, array: YcArray): void 回调函数
 ---@return YcArray 原数组
 function YcArray:forEach(f)
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     f(v, i, self)
   end
   return self
@@ -195,7 +175,7 @@ end
 ---@return YcArray<T> 新数组
 function YcArray:map(f)
   local array = YcArray:new()
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     array:push(f(v, i, self))
   end
   return array
@@ -205,7 +185,7 @@ end
 ---@param f fun(currentValue: any, index: integer, array: YcArray): boolean 回调函数
 ---@return boolean 是否有元素满足
 function YcArray:some(f)
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     if f(v, i, self) then
       return true
     end
@@ -217,7 +197,7 @@ end
 ---@param f fun(currentValue: any, index: integer, array: YcArray): boolean 回调函数
 ---@return boolean 是否所有元素都满足
 function YcArray:every(f)
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     if not f(v, i, self) then
       return false
     end
@@ -230,7 +210,7 @@ end
 ---@return YcArray 新数组
 function YcArray:filter(f)
   local array = YcArray:new()
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     if f(v, i, self) then
       array:push(v)
     end
@@ -246,14 +226,14 @@ function YcArray:reduce(f, initialValue)
   local total -- 计算返回值
   if initialValue == nil then -- 如果没有初始值
     if self:length() > 0 then -- 如果数组内有元素
-      total = self.array[1] -- 计算返回值为数组内第一个
+      total = self[1] -- 计算返回值为数组内第一个
       for i = 2, self:length(), 1 do -- 从数组中第二个开始循环
-        total = f(total, self.array[i], i, self)
+        total = f(total, self[i], i, self)
       end
     end
   else -- 如果有初始值
     total = initialValue
-    for i, v in ipairs(self.array) do
+    for i, v in ipairs(self) do
       total = f(total, v, i, self)
     end
   end
@@ -264,7 +244,7 @@ end
 ---@param f fun(currentValue: any, index: integer, array: YcArray): any 回调函数
 ---@return any 满足条件的值。
 function YcArray:find(f)
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     if f(v, i, self) then
       return v
     end
@@ -276,7 +256,7 @@ end
 ---@param f fun(currentValue: any, index: integer, array: YcArray): any 回调函数
 ---@return integer 满足条件的值的索引。
 function YcArray:findIndex(f)
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     if f(v, i, self) then
       return i
     end
@@ -303,9 +283,8 @@ function YcArray:indexOf(value, startIndex)
   if startIndex < 0 then -- 负值则反向计数
     startIndex = num + startIndex + 1
   end
-  local array = self.array
   for i = startIndex, num do
-    local v = array[i]
+    local v = self[i]
     if v == value then
       return i
     end
@@ -323,9 +302,8 @@ function YcArray:lastIndexOf(value, startIndex)
   if startIndex < 0 then -- 负值则反向计数
     startIndex = num + startIndex + 1
   end
-  local array = self.array
   for i = startIndex, 1, -1 do
-    local v = array[i]
+    local v = self[i]
     if v == value then
       return i
     end
@@ -350,7 +328,7 @@ function YcArray:fill(value, startIndex, endIndex)
   end
   self:forEach(function(item, index)
     if index >= startIndex and index <= endIndex then
-      self.array[index] = value
+      self[index] = value
     end
   end)
   return self
@@ -362,7 +340,7 @@ end
 function YcArray:join(separator)
   separator = separator or ','
   local str = ''
-  for i, v in ipairs(self.array) do
+  for i, v in ipairs(self) do
     if i == self:length() then -- 如果是最后一个
       str = YcStringHelper.concat(str, v)
     else -- 如果不是最后一个
@@ -378,11 +356,11 @@ function YcArray:reverse()
   local array = {}
   local num = self:length()
   for i = 1, num do
-    array[i] = self.array[num - i + 1]
+    array[i] = self[num - i + 1]
   end
   -- 循环覆盖原值
   for i, v in ipairs(array) do
-    self.array[i] = v
+    self[i] = v
   end
   return self
 end
@@ -404,7 +382,7 @@ function YcArray:slice(startIndex, endIndex)
   local array = {}
   local index = 1
   for i = startIndex, endIndex do
-    array[index] = self.array[i]
+    array[index] = self[i]
     index = index + 1
   end
   return YcArray:new(array)
@@ -421,7 +399,7 @@ function YcArray:splice(index, howmany, ...)
   local len = self:length()
   -- 将index之前的元素放入新数组
   for i = 1, index - 1 do
-    array[idx] = self.array[i]
+    array[idx] = self[i]
     idx = idx + 1
   end
   -- 将需要插入的元素放入新数组
@@ -432,24 +410,24 @@ function YcArray:splice(index, howmany, ...)
   end
   -- 将删除后剩余数组元素放入新数组
   for i = index + howmany, len do
-    array[idx] = self.array[i]
+    array[idx] = self[i]
     idx = idx + 1
   end
   -- 将需要删除的元素加入新数组
   local array2 = {}
   local idx2 = 1
   for i = 1, howmany do
-    array2[i] = self.array[index + i - 1]
+    array2[i] = self[index + i - 1]
   end
   -- 准备覆盖数组
   if len > #array then -- 如果原数组比新数组长，则需要删除超长的部分
     for i = len, #array + 1, -1 do
-      table.remove(self.array, i)
+      table.remove(self, i)
     end
   end
   -- 覆盖原数组
   for i, v in ipairs(array) do
-    self.array[i] = array[i]
+    self[i] = array[i]
   end
   return YcArray:new(array2)
 end
@@ -458,7 +436,7 @@ end
 ---@param f nil | fun(a: any, b: any): boolean
 ---@return YcArray 原数组
 function YcArray:sort(f)
-  table.sort(self.array, f)
+  table.sort(self, f)
   return self
 end
 
@@ -466,19 +444,4 @@ end
 ---@return string 输出内容
 function YcArray:__tostring()
   return YcStringHelper.concat('{', self:join(), '}')
-end
-
---- 检查索引是否正常
----@param index integer 索引
----@return boolean 是否正常
-function YcArray:checkIndex(index)
-  if type(index) ~= 'number' then
-    YcLogHelper.error('数组索引错误：', index)
-    return false
-  end
-  if index < 1 or index > self:length() then
-    YcLogHelper.error('数组索引越界：', index)
-    return false
-  end
-  return true
 end

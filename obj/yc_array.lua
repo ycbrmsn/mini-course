@@ -1,7 +1,7 @@
---- 数组类 v1.0.1
+--- 数组类 v1.0.2
 --- created by 莫小仙 on 2023-12-04
---- last modified on 2023-12-10
----@class YcArray 数组对象
+--- last modified on 2023-12-12
+---@class YcArray 数组
 YcArray = {
   TYPE = 'YC_ARRAY'
 }
@@ -340,8 +340,10 @@ end
 function YcArray:join(separator)
   separator = separator or ','
   local str = ''
-  for i, v in ipairs(self) do
-    if i == self:length() then -- 如果是最后一个
+  local len = self:length()
+  for i = 1, len do
+    local v = self[i]
+    if i == len then -- 如果是最后一个
       str = YcStringHelper.concat(str, v)
     else -- 如果不是最后一个
       str = YcStringHelper.concat(str, v, separator)

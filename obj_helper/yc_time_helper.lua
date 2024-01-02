@@ -1,6 +1,6 @@
---- 时间工具类 v1.4.3
+--- 时间工具类 v1.4.4
 --- created by 莫小仙 on 2022-05-22
---- last modified on 2023-08-06
+--- last modified on 2024-01-02
 YcTimeHelper = {
   globalIndex = 0, -- 全局计数器，主要用于默认类型t
   frame = 0, -- 帧数
@@ -23,7 +23,7 @@ YcTimeHelper = {
 }
 
 --- 获取下一个序数
-function YcTimeHelper.getNextGlobalIndex()
+function YcTimeHelper._getNextGlobalIndex()
   YcTimeHelper.globalIndex = YcTimeHelper.globalIndex + 1
   return YcTimeHelper.globalIndex
 end
@@ -35,7 +35,7 @@ end
 
 --- 帧数递增
 ---@return nil
-function YcTimeHelper.addFrame()
+function YcTimeHelper._addFrame()
   if YcTimeHelper.frameInfo[YcTimeHelper.frame] then -- 如果上一帧有记录
     YcTimeHelper.frameInfo[YcTimeHelper.frame] = nil -- 清除历史数据
   end
@@ -71,7 +71,7 @@ end
 ---@param frame integer 帧数
 ---@param t string 类型
 ---@return nil
-function YcTimeHelper.addAfterTimeTask(f, frame, t)
+function YcTimeHelper._addAfterTimeTask(f, frame, t)
   local tasks = YcTimeHelper.afterTimeTaskInfo[frame]
   if not tasks then -- 没找到任何任务，则在该帧初始化一个任务数组
     tasks = {}
@@ -112,7 +112,7 @@ end
 --- 运行任务
 --- 框架内调用
 ---@return nil
-function YcTimeHelper.runAfterTimeTasks()
+function YcTimeHelper._runAfterTimeTasks()
   local frame = YcTimeHelper.frame
   local tasks = YcTimeHelper.afterTimeTaskInfo[frame]
   if tasks then -- 任务数组存在
@@ -139,8 +139,8 @@ function YcTimeHelper.newAfterTimeTask(f, seconds, t)
   seconds = seconds or 1 -- 默认为1秒后
   local frame = math.ceil(seconds * 20) -- 秒数转换为帧数
   frame = frame + YcTimeHelper.frame -- 实际帧数
-  local t = t or YcTimeHelper.getNextGlobalIndex() -- 任务类型默认为一个全局序数
-  YcTimeHelper.addAfterTimeTask(f, frame, t)
+  local t = t or YcTimeHelper._getNextGlobalIndex() -- 任务类型默认为一个全局序数
+  YcTimeHelper._addAfterTimeTask(f, frame, t)
   return t, frame
 end
 ------- end -------
@@ -153,7 +153,7 @@ end
 ---@param frame integer 延迟帧数
 ---@param t string | number 任务类型
 ---@return nil
-function YcTimeHelper.addAfterTimeOnceTask(f, frame, t)
+function YcTimeHelper._addAfterTimeOnceTask(f, frame, t)
   local taskMap = YcTimeHelper.afterTimeOnceTaskInfo[frame]
   if not taskMap then -- 该帧对应任务映射不存在
     taskMap = {}
@@ -189,7 +189,7 @@ end
 --- 运行任务
 --- 框架内调用
 ---@return nil
-function YcTimeHelper.runAfterTimeOnceTasks()
+function YcTimeHelper._runAfterTimeOnceTasks()
   local frame = YcTimeHelper.frame
   local taskMap = YcTimeHelper.afterTimeOnceTaskInfo[frame]
   if taskMap then -- 找到任务映射
@@ -216,7 +216,7 @@ function YcTimeHelper.newAfterTimeOnceTask(f, seconds, t)
   frame = frame + YcTimeHelper.frame -- 实际帧数
   local t = t or 'default' -- 任务类型默认为default
   YcTimeHelper.delAfterTimeOnceTask(t, frame) -- 清空还未执行的同类型任务
-  YcTimeHelper.addAfterTimeOnceTask(f, frame, t)
+  YcTimeHelper._addAfterTimeOnceTask(f, frame, t)
   return t, frame
 end
 ------- end -------
@@ -272,7 +272,7 @@ end
 ---@param frames integer 间隔帧数
 ---@param t string | number 任务类型
 ---@return nil
-function YcTimeHelper.addIntervalTask(f, frames, t)
+function YcTimeHelper._addIntervalTask(f, frames, t)
   local frame = YcTimeHelper.frame + frames -- 下一次执行时间
   local info = {
     f = f,
@@ -336,7 +336,7 @@ end
 --- 运行任务
 --- 框架内调用
 ---@return nil
-function YcTimeHelper.runIntervalTasks()
+function YcTimeHelper._runIntervalTasks()
   local frame = YcTimeHelper.frame
   local arr = YcTimeHelper.intervalTaskInfo.frame[frame]
   if arr then -- 找到任务信息数组
@@ -354,7 +354,7 @@ function YcTimeHelper.runIntervalTasks()
     YcTimeHelper.delIntervalTask(nil, frame) -- 删除该帧的所有任务映射
     -- 添加还需要下次执行的任务
     for i, info in ipairs(nextTimeInfos) do
-      YcTimeHelper.addIntervalTask(info.f, info.frames, info.t)
+      YcTimeHelper._addIntervalTask(info.f, info.frames, info.t)
     end
   end
 end
@@ -388,7 +388,7 @@ function YcTimeHelper.newIntervalTask(f, seconds, t)
         YcTimeHelper.newIntervalTask(f, seconds, t) -- 重新调用
       else -- 时间间隔还不够，则更新任务
         YcTimeHelper.delIntervalTask(t) -- 删除定时任务信息
-        YcTimeHelper.addIntervalTask(f, frameDiff, t) -- 添加任务
+        YcTimeHelper._addIntervalTask(f, frameDiff, t) -- 添加任务
       end
     end
   else -- 没有执行过该定时任务
@@ -396,7 +396,7 @@ function YcTimeHelper.newIntervalTask(f, seconds, t)
     if result then -- 返回值为真，表示满足条件，则没有后续操作
       -- do nothing
     else -- 不满足条件，则添加任务，等待下次执行
-      YcTimeHelper.addIntervalTask(f, math.ceil(seconds * 20), t)
+      YcTimeHelper._addIntervalTask(f, math.ceil(seconds * 20), t)
     end
   end
 end
@@ -408,7 +408,7 @@ end
 ---@param f function 执行函数
 ---@param frames integer 持续执行多久（帧数）
 ---@param t string | number 任务类型
-function YcTimeHelper.addContinueTask(f, frames, t)
+function YcTimeHelper._addContinueTask(f, frames, t)
   local task
   for i, info in ipairs(YcTimeHelper.continueTaskInfo) do -- 遍历所有持续任务
     if info.t == t then -- 找到相同类型
@@ -448,7 +448,7 @@ end
 --- 运行任务
 --- 框架内调用
 ---@return nil
-function YcTimeHelper.runContinueTasks()
+function YcTimeHelper._runContinueTasks()
   -- 顺序执行
   for i, info in ipairs(YcTimeHelper.continueTaskInfo) do -- 遍历所有任务
     if info.frames > 0 then -- 表示还有剩余时间
@@ -480,17 +480,17 @@ function YcTimeHelper.newContinueTask(f, seconds, t)
   seconds = seconds or -1 -- 所有负数时间表示一直执行
   t = t or 'default'
   local frames = seconds < 0 and -1 or math.ceil(seconds * 20) -- 持续时间（帧数）
-  YcTimeHelper.addContinueTask(f, frames, t) -- 添加任务
+  YcTimeHelper._addContinueTask(f, frames, t) -- 添加任务
 end
 ------- end -------
 
 -- 游戏运行时函数
 local runGame = function()
-  YcTimeHelper.addFrame() -- 帧数递增
-  YcTimeHelper.runAfterTimeTasks() -- 运行当前帧对应的 一定时间后执行的任务
-  YcTimeHelper.runAfterTimeOnceTasks() -- 运行当前帧对应的 一定时间后才会执行的任务
-  YcTimeHelper.runIntervalTasks() -- 运行当前帧对应的 定时任务
-  YcTimeHelper.runContinueTasks() -- 运行当前帧对应的 持续执行任务
+  YcTimeHelper._addFrame() -- 帧数递增
+  YcTimeHelper._runAfterTimeTasks() -- 运行当前帧对应的 一定时间后执行的任务
+  YcTimeHelper._runAfterTimeOnceTasks() -- 运行当前帧对应的 一定时间后才会执行的任务
+  YcTimeHelper._runIntervalTasks() -- 运行当前帧对应的 定时任务
+  YcTimeHelper._runContinueTasks() -- 运行当前帧对应的 持续执行任务
 end
 
 ScriptSupportEvent:registerEvent([=[Game.Run]=], runGame) -- 游戏运行时注册事件

@@ -1,8 +1,10 @@
---- 道具类 v1.0.1
+--- 道具类 v1.0.2
 --- created by 莫小仙 on 2022-06-19
---- last modified on 2023-08-06
----@class YcItem 道具
-YcItem = {}
+--- last modified on 2024-01-02
+---@class YcItem : YcTable 道具
+YcItem = YcTable:new({
+  TYPE = 'YC_ITEM'
+})
 
 --- 实例化
 ---@param o table 包含道具的基本属性

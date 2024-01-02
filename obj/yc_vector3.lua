@@ -1,13 +1,13 @@
---- 三维向量类 v1.1.2
+--- 三维向量类 v1.1.3
 --- created by 莫小仙 on 2022-05-15
---- last modified on 2023-08-06
----@class YcVector3 三维向量
+--- last modified on 2024-01-02
+---@class YcVector3 : YcTable 三维向量
 ---@field x number x坐标
 ---@field y number y坐标
 ---@field z number z坐标
-YcVector3 = {
+YcVector3 = YcTable:new({
   TYPE = 'YC_VECTOR3'
-}
+})
 
 --- 判断是否是三维向量对象
 ---@param obj any 任意类型
@@ -224,3 +224,6 @@ end
 function YcVector3:toString()
   return '{x=' .. self.x .. ',y=' .. self.y .. ',z=' .. self.z .. '}'
 end
+
+-- 缩写
+YcVec3 = YcVector3

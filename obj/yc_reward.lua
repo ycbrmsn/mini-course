@@ -1,9 +1,10 @@
---- 奖励类 v1.0.0
+--- 奖励类 v1.0.1
 --- created by 莫小仙 on 2023-10-17
----@class YcReward : YcRewardParam
-YcReward = {
+--- last modified on 2023-12-20
+---@class YcReward : YcTable
+YcReward = YcTable:new({
   TYPE = 'YC_REWARD'
-}
+})
 
 --- 用于实例化任务奖励的参数
 ---@class YcRewardParam

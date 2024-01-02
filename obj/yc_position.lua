@@ -1,10 +1,13 @@
---- 位置类 v1.0.3
+--- 位置类 v1.0.4
 --- created by 莫小仙 on 2022-05-14
---- last modified on 2023-08-06
----@class YcPosition 位置
-YcPosition = {
+--- last modified on 2024-01-02
+---@class YcPosition : YcTable 位置
+---@field x number x位置
+---@field y number y位置
+---@field z number z位置
+YcPosition = YcTable:new({
   TYPE = 'YC_POSITION'
-}
+})
 
 --- 判断是否是位置对象
 ---@param pos table
@@ -188,3 +191,6 @@ end
 function YcPosition:toSimpleString()
   return StringHelper.concat(self.x, ',', self.y, ',', self.z)
 end
+
+-- 缩写
+YcPos = YcPosition

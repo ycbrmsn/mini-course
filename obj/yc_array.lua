@@ -1,10 +1,10 @@
 --- 数组类 v1.0.2
 --- created by 莫小仙 on 2023-12-04
---- last modified on 2023-12-12
----@class YcArray 数组
-YcArray = {
+--- last modified on 2023-12-20
+---@class YcArray : YcTable 数组
+YcArray = YcTable:new({
   TYPE = 'YC_ARRAY'
-}
+})
 
 --- 判断是否是一个数组
 ---@param o any 需要判断的元素
@@ -445,5 +445,8 @@ end
 --- 自定义表的输出内容
 ---@return string 输出内容
 function YcArray:__tostring()
-  return YcStringHelper.concat('{', self:join(), '}')
+  return YcStringHelper.concat('[', self:join(), ']')
 end
+
+-- 缩写
+YcArr = YcArray

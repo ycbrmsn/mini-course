@@ -1,15 +1,16 @@
---- 真实任务类 v1.0.0
+--- 真实任务类 v1.0.1
 --- created by 莫小仙 on 2023-11-12
----@class YcRealTask 真实任务
+--- last modified on 2023-12-20
+---@class YcRealTask : YcTable 真实任务
 ---@field task YcTask 任务
 ---@field objectives YcArray<YcObjective> 任务目标信息
 ---@field querying boolean 任务是否正在查询中
 ---@field delivering boolean 任务是否正在交付中
 ---@field finish boolean 任务是否结束/关闭
 ---@field complete boolean 任务是否完成，如果不为空，则用来判断任务是否完成，常用于特殊类任务，通过手动设置是否完成
-YcRealTask = {
+YcRealTask = YcTable:new({
   TYPE = 'YC_REAL_TASK'
-}
+})
 
 --- 是否是一个任务对象
 ---@param o any 判断对象
@@ -131,3 +132,6 @@ end
 function YcRealTask:__tostring()
   return YcStringHelper.concat('{TYPE=', self.TYPE, ',id=', self.task.id, ',name=', self.task.name, '}')
 end
+
+-- 缩写
+YcRTask = YcRealTask

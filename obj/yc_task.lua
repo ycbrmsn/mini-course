@@ -1,10 +1,11 @@
---- 任务类 v1.0.0
+--- 任务类 v1.0.1
 --- created by 莫小仙 on 2023-11-12
----@class YcTask : YcTaskParam
+--- last modified on 2023-12-20
+---@class YcTask : YcTaskParam : YcTable
 ---@field objectives YcArray<YcObjective> 任务目标集合
-YcTask = {
+YcTask = YcTable:new({
   TYPE = 'YC_TASK'
-}
+})
 
 --- 用于实例化任务的参数
 ---@class YcTaskParam

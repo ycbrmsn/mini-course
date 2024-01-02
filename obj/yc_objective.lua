@@ -1,6 +1,7 @@
---- 任务目标类 v1.0.0
+--- 任务目标类 v1.0.1
 --- created by 莫小仙 on 2023-11-12
----@class YcObjective 任务目标
+--- last modified on 2023-12-20
+---@class YcObjective : YcTable 任务目标
 ---@field category "1" | "2" | "3" | "99" 任务目标类型：1击败生物；2交付道具；3达到等级；99自定义目标
 --- 击败生物类型对应属性
 ---@field actorid integer 生物类型id
@@ -17,9 +18,9 @@
 ---@field level integer 当前等级
 --- 自定义类型对应属性
 ---@field f fun(playerid: integer) 判断是否完成目标的函数
-YcObjective = {
+YcObjective = YcTable:new({
   TYPE = 'YC_OBJECTIVE'
-}
+})
 
 --- 是否是一个任务目标
 ---@param o any 判断对象
@@ -175,9 +176,9 @@ YcObjectiveCategory = {
   CUSTOM = 99 -- 自定义类型
 }
 
--- 几个缩写函数
-YO = YcObjective
-YO.newBT = YO.newBeatType
-YO.newIT = YO.newItemType
-YO.newLT = YO.newLevelType
-YO.newCT = YO.newCustomType
+-- 缩写
+YcObj = YcObjective
+YcObj.newBT = YcObj.newBeatType
+YcObj.newIT = YcObj.newItemType
+YcObj.newLT = YcObj.newLevelType
+YcObj.newCT = YcObj.newCustomType

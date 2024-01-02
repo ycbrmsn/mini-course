@@ -1,33 +1,42 @@
---- 字符串工具类 v1.1.1
+--- 字符串工具类 v1.1.2
 --- created by 莫小仙 on 2022-05-22
---- last modified on 2023-08-06
+--- last modified on 2023-12-20
 YcStringHelper = {}
 
 --- 转换为字符串
 ---@param obj any 任意类型
+---@param existTables nil | YcArray<table> 已经存在的表。nil表示还没有表存在
 ---@return string
-function YcStringHelper.toString(obj)
+function YcStringHelper.toString(obj, existTables)
+  existTables = existTables or YcArray:new()
   if type(obj) == 'table' then
-    return YcStringHelper.tableToString(obj)
+    if existTables:includes(obj) then -- 已出现过该表
+      return '{递归表}'
+    else
+      existTables:push(obj) -- 记录该表已出现
+      return YcStringHelper.tableToString(obj, existTables)
+    end
   else
     return tostring(obj)
   end
 end
 
---- 表转换为字符串
+--- 表转换为字符串。将忽略__index属性
 ---@param t table 表
+---@param existTables nil | YcArray<table> 已经存在的表。nil表示还没有表存在
 ---@return string 转换结果
-function YcStringHelper.tableToString(t)
-  local str = '{ '
+function YcStringHelper.tableToString(t, existTables)
+  existTables = existTables or YcArray:new()
+  local str = '{'
   local index = 1
   for k, v in pairs(t) do
     if index ~= 1 then
       str = str .. ', '
     end
-    str = str .. k .. ' = ' .. YcStringHelper.toString(v)
+    str = str .. YcStringHelper.toString(k, existTables) .. ' = ' .. YcStringHelper.toString(v, existTables)
     index = index + 1
   end
-  str = str .. ' }'
+  str = str .. '}'
   return str
 end
 

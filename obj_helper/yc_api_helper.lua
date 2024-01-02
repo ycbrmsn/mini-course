@@ -5,11 +5,6 @@ YcApiHelper = {
   levels = {'debug', 'info', 'warn'} -- 显示API调用失败的日志级别
 }
 
--- lua5.1版本为unpack，lua5.3为table.unpack
-if not unpack then
-  unpack = table.unpack
-end
-
 --- 是否是满足条件的日志级别
 ---@return boolean 是否满足
 function YcApiHelper.isSatisfiedLevel()

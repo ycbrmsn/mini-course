@@ -83,7 +83,7 @@ function YcTimeHelper._addAfterTimeTask(f, frame, t)
   }) -- 添加任务
 end
 
---- 删除任务。t和frame不同同时不存在。
+--- 删除任务。t和frame不能同时不存在。
 --- 供使用方法
 ---@param t string | number | nil 任务类型，nil表示删除指定帧数的所有任务
 ---@param frame integer | nil 帧数，nil表示删除指定类型的所有任务

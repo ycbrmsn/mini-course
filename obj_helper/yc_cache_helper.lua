@@ -10,6 +10,11 @@ YcCacheHelper = {
     map = {}, -- { [objid] = teamid }
     time = 180, -- 最多缓存180秒后清除
     t = 'cacheTeamid'
+  },
+  actorid = { -- 生物类型信息
+    map = {}, -- { [objid] = actorid }
+    time = 60, -- 最多缓存60秒后清除
+    t = 'cacheActorid'
   }
 }
 
@@ -95,7 +100,7 @@ function YcCacheHelper.getTeam(objid, notUseCache)
   else -- 使用缓存
     local teamid = teamInfo.map[objid] -- 查询缓存队伍信息
     if teamid == nil then -- 不存在，表示未缓存
-      local teamid = YcActorHelper.getTeam(objid)
+      teamid = YcActorHelper.getTeam(objid)
       if teamid then -- teamid存在，表示获取成功
         YcCacheHelper.recordInfoSomeTime(teamInfo.map, objid, teamid, teamInfo.time, teamInfo.t) -- 缓存一段时间
         return teamid
@@ -104,6 +109,36 @@ function YcCacheHelper.getTeam(objid, notUseCache)
       end
     else
       return teamid
+    end
+  end
+end
+
+--- 获取生物的生物类型信息。如果使用缓存，则优先从缓存中取。无论是否使用缓存，都会缓存本次结果
+---@param objid integer 生物id
+---@param notUseCache boolean | nil 是否不使用缓存，默认使用缓存
+---@return integer | nil 生物类型id，nil表示找不到生物类型信息
+function YcCacheHelper.getAcotrId(objid, notUseCache)
+  local actoridInfo = YcCacheHelper.actorid -- 生物类型信息
+  if notUseCache then -- 不使用缓存
+    local actorid = CreatureAPI.getActorID(objid)
+    if actorid then -- actorid存在，表示获取生物成功
+      YcCacheHelper.recordInfoSomeTime(actoridInfo.map, objid, actorid, actoridInfo.time, actoridInfo.t) -- 缓存一段时间
+      return actorid
+    else -- 获取失败
+      return nil
+    end
+  else -- 使用缓存
+    local actorid = actoridInfo.map[objid] -- 查询缓存生物类型信息
+    if actorid == nil then -- 不存在，表示未缓存
+      actorid = CreatureAPI.getActorID(objid)
+      if actorid then -- actorid存在，表示获取成功
+        YcCacheHelper.recordInfoSomeTime(actoridInfo.map, objid, actorid, actoridInfo.time, actoridInfo.t) -- 缓存一段时间
+        return actorid
+      else -- 获取失败
+        return nil
+      end
+    else
+      return actorid
     end
   end
 end
@@ -145,6 +180,12 @@ function YcCacheHelper.despawnActor(objid)
     if teamInfo.map[objid] then
       teamInfo.map[objid] = nil
       YcTimeHelper.delAfterTimeTask(objid .. teamInfo.t) -- 清除延时任务
+    end
+    -- 清除生物类型信息
+    local actoridInfo = YcCacheHelper.actorid
+    if actoridInfo.map[objid] then
+      actoridInfo.map[objid] = nil
+      YcTimeHelper.delAfterTimeTask(objid .. actoridInfo.t) -- 清除延时任务
     end
   end
   return result

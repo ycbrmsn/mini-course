@@ -15,6 +15,16 @@ function YcTable:new(o)
   return o
 end
 
+--- 遍历表
+---@param f fun(currentValue: any, currentKey: any): void 回调函数
+---@return YcTable 原表
+function YcTable:pairs(f)
+  for k, v in pairs(self) do
+    f(v, k)
+  end
+  return self
+end
+
 --- 克隆表对象。默认浅克隆
 ---@param deep boolean 是否是深克隆
 ---@return YcTable 表对象

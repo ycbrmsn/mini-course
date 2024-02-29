@@ -9,7 +9,8 @@ YcEventHelper = {
     PLAYER_GAIN_EXP = 'Player.GainExp', -- 玩家获得经验
     PLAYER_DEFEAT_TASK_ACTOR = 'Player.DefeatTaskActor', -- 玩家击败任务生物
     PLAYER_ADD_TASK_ITEM = 'Player.AddTaskItem', -- 玩家获得任务道具
-    PLAYER_LOSE_TASK_ITEM = 'Player.LoseTaskItem' -- 玩家失去任务道具
+    PLAYER_LOSE_TASK_ITEM = 'Player.LoseTaskItem', -- 玩家失去任务道具
+    PLAYER_CHANGE_MOVEABLE = 'Player.ChangeMoveable' -- 玩家是否能够移动设置改变
   }
 }
 
@@ -121,3 +122,10 @@ local eventnames = {
 
 -- 注册上述事件
 YcEventHelper.registerGameAPIEvents(eventnames)
+
+-- 不知道为什么每秒执行一次的事件被官方搞没了，这里自定义实现一个Game.RealSecond
+ScriptSupportEvent:registerEvent([=[Game.Run]=], function(event)
+  if YcTimeHelper.getFrame() % 20 == 0 then -- 20帧为一秒
+    YcEventHelper.triggerEvent('Game.RealSecond')
+  end
+end)

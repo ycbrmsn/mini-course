@@ -13,14 +13,14 @@ function YcWeakTable.isWeakTable(o)
 end
 
 --- 实例化
----@param array table 数组
+---@param o table 表
 ---@return YcWeakTable 弱表对象
-function YcWeakTable:new(array)
-  array = type(array) == 'table' and array or {} -- 如果array不是table，则赋值为空数组
+function YcWeakTable:new(o)
+  o = type(o) == 'table' and o or {} -- 如果o不是table，则赋值为空表
   self.__index = self
   self.__mode = 'k'
-  setmetatable(array, self)
-  return array
+  setmetatable(o, self)
+  return o
 end
 
 --- 自定义表的输出内容

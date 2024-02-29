@@ -200,3 +200,98 @@ function YcPositionHelper.getRectRange(pos, dim)
   return YcPosition:new(pos.x - dim.x, pos.y - dim.y, pos.z - dim.z),
     YcPosition:new(pos.x + dim.x, pos.y + dim.y, pos.z + dim.z)
 end
+
+--- 获取两点构成的线段经过的所有方块位置。方块位置是指一个方块所在的位置
+---@param pos1 table{ x: number, y: number, z: number } 点1位置
+---@param pos2 table{ x: number, y: number, z: number } 点2位置
+---@return YcArray<YcPosition> 方块位置数组
+function YcPositionHelper.getBlockPositionsBetweenTwoPositions(pos1, pos2)
+  pos1 = YcPosition:new(pos1)
+  pos2 = YcPosition:new(pos2)
+  local blockPosList = YcArray:new()
+  local blockPos1 = pos1:floor() -- 起点方块位置
+  blockPosList:push(blockPos1)
+  local vec3 = YcVector3:new(pos1, pos2) -- 方向向量
+  local len = vec3:length() -- 两点间距离
+  local vecNormal = vec3:normalize() -- 单位向量
+  local s = 0 -- 从起点往终点的线段上前进的距离
+  local currPos = pos1 -- 当前点
+  -- 循环找出所有中间方块
+  while true do
+    -- 判断当前哪个方向上更快进入下一个方格
+    local tx, bx = YcPositionHelper.getReachBoundaryTime(currPos, vecNormal, 'x')
+    local ty, by = YcPositionHelper.getReachBoundaryTime(currPos, vecNormal, 'y')
+    local tz, bz = YcPositionHelper.getReachBoundaryTime(currPos, vecNormal, 'z')
+    -- 将三个分量放入数组
+    local arr = YcArray:new()
+    arr:push(YcTable:new({
+      t = tx,
+      b = bx,
+      c = 'x'
+    }), YcTable:new({
+      t = ty,
+      b = by,
+      c = 'y'
+    }), YcTable:new({
+      t = tz,
+      b = bz,
+      c = 'z'
+    }))
+    -- 按时间升序排列，第一个最小
+    arr:sort(function(a, b)
+      return a.t < b.t
+    end)
+    local minInfo = arr[1] -- 第一个值就是最先抵达边界的坐标分量信息
+    s = s + minInfo.t -- 因为是单位向量，可以认为速度v是1。于是由s = vt得到s = t
+    if s < len then -- 如果还没有到达终点，那么说明线段到达边界后还会继续前进，进入下一个方块
+      -- 更新到达边界的点的位置
+      currPos = YcPosition:new(pos1.x + vecNormal.x * s, pos1.y + vecNormal.y * s, pos1.z + vecNormal.z * s)
+      -- 为了避免到底边界点的误差，重新赋值。至于另外两个方向上的误差，就忽略了
+      currPos[minInfo.c] = minInfo.b
+      -- 这里需要做一个边界判断。虽然说是一个分量到达边界，但有可能同时还有其他分量也到达边界了
+      -- 所以这里对三个边界都判断一下
+      local bs = {'x', 'y', 'z'} -- 分量名数组
+      local offsetArr = {0, 0, 0} -- 各分类偏移位置
+      -- 遍历分量，获得偏移位置。正向不变，逆向减1。因为位置点是各分类向下取整的
+      -- 如：分量向上到达1时，下一个极近的点范围在(1,2)，向下取整还是1，与分量相同；
+      -- 分量向下达到1时，下一个极近的点范围在(0,1)，向下取整是0，比分量小1
+      for i, coor in ipairs(bs) do
+        if currPos[coor] == math.floor(currPos[coor]) then -- 该分量到达边界
+          if vecNormal[coor] < 0 then -- 如果是减少
+            offsetArr[i] = -1
+          end
+        end
+      end
+      -- 准备计算得出边界点属于哪一个方块
+      local blockPos = currPos:floor() -- 各分量向下取整
+      if offsetArr[1] ~= 0 then
+        blockPos.x = blockPos.x - 1
+      end
+      if offsetArr[2] ~= 0 then
+        blockPos.y = blockPos.y - 1
+      end
+      if offsetArr[3] ~= 0 then
+        blockPos.z = blockPos.z - 1
+      end
+      blockPosList:push(blockPos)
+    else -- 如果超过了终点
+      break
+    end
+  end
+  return blockPosList
+end
+
+function YcPositionHelper.getReachBoundaryTime(pos, speed, coordinate)
+  local boundary -- 最近边界
+  if speed[coordinate] > 0 then -- x方向上在增加
+    boundary = math.floor(pos[coordinate] + 1)
+    local offsetX = boundary - pos[coordinate] -- 当前坐标分量上与边界的距离
+    return offsetX / speed[coordinate], boundary
+  elseif speed[coordinate] < 0 then -- x方向上在减少
+    boundary = math.ceil(pos[coordinate] - 1)
+    local offsetX = boundary - pos[coordinate] -- 当前坐标分量上与边界的距离
+    return offsetX / speed[coordinate], boundary
+  else -- x方向上不变
+    return 9999 -- 这里用9999表示无穷大。因为这里的时间最小值（三个方向速度相等时）不会大于根号三，所以任意大于根号三的值都行
+  end
+end

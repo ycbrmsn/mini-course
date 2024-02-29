@@ -272,11 +272,10 @@ function AreaAPI.getAllPlayersInAreaRange (posBeg, posEnd)
   end, '获取区域范围内全部玩家', 'posBeg=', posBeg, ',posEnd=', posEnd)
 end
 
---[[
-  @param  {table} posBeg 区域起始位置
-  @param  {table} posEnd 区域结束位置
-  @return {table | nil} 生物id数组，nil表示获取失败
-  ]]
+--- 获取区域范围内全部生物
+---@param posBeg table{ x: number, y: number, z: number } 区域起始位置
+---@param posEnd table{ x: number, y: number, z: number } 区域结束位置
+---@return table | nil 生物id数组，nil表示获取失败
 function AreaAPI.getAllCreaturesInAreaRange (posBeg, posEnd)
   return YcApiHelper.callResultMethod(function ()
     return Area:getAllCreaturesInAreaRange(posBeg, posEnd)

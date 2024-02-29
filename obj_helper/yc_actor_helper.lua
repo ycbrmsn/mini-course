@@ -1,7 +1,37 @@
---- 行为者工具类 v1.0.2
+--- 行为者工具类 v1.1.0
 --- created by 莫小仙 on 2023-01-14
---- last modified on 2023-08-05
+--- last modified on 2023-12-18
 YcActorHelper = {}
+
+--- 获得生物眼睛高度的位置
+---@param objid integer 行为者id
+---@param notUseCache boolean 是否不使用缓存，默认使用缓存
+---@return YcPosition | nil 眼睛位置，nil表示找不到该生物
+function YcActorHelper.getEyeHeightPosition(objid, notUseCache)
+  local pos = YcCacheHelper.getYcPosition(objid, notUseCache)
+  if pos then -- 生物存在
+    local height = ActorAPI.getEyeHeight(objid) -- 眼睛高度
+    if height then
+      pos.y = pos.y + height
+    end
+  end
+  return pos
+end
+
+--- 获取生物视线方向多远的位置
+---@param objid integer 行为者id
+---@param distance number 距离
+---@param notUseCache boolean 是否不使用缓存，默认使用缓存
+---@return YcPosition | nil 目标位置，nil表示找不到该生物
+function YcActorHelper.getFaceDistancePosition(objid, distance, notUseCache)
+  local pos = YcActorHelper.getEyeHeightPosition(objid, notUseCache) -- 眼睛位置
+  if pos then
+    local x, y, z = ActorAPI.getFaceDirection(objid) -- 朝向
+    local vec3 = YcVector3:new(x, y, z):normalize() -- 朝向的单位向量
+    local distVec3 = vec3 * distance -- 距离向量
+    return pos + distVec3
+  end
+end
 
 --- 获取距离行为者多远的水平位置，受行为者朝向影响
 ---@param objid integer 行为者id
@@ -239,4 +269,87 @@ function YcActorHelper.getNearestActor(objids, pos, isTwo)
     end
   end
   return objid, minDistance
+end
+
+--  执行者、目标、是否需要旋转镜头（三维视角需要旋转），toobjid可以是objid、位置、玩家、生物
+--- 行为者看向
+---@param objid integer | YcArray<integer> 玩家id/生物id 或 玩家id数组/生物id数组
+---@param toobjid integer | YcActor | YcPosition 目标玩家id/生物id 或 目标玩家/生物 或 位置
+---@param needRotateCamera boolean 是否需要旋转镜头（三维视角需要旋转）
+function YcActorHelper.lookAt(objid, toobjid, needRotateCamera)
+  -- LogHelper.debug('lookat')
+  if type(objid) == 'number' then -- 单个执行者
+    local x, y, z
+    if type(toobjid) == 'table' then
+      -- 判断是不是玩家或者生物
+      if toobjid.TYPE == YcActor.TYPE then -- 玩家或生物
+        toobjid = toobjid.objid
+      else -- 是个位置
+        x, y, z = toobjid.x, toobjid.y, toobjid.z
+      end
+    end
+    if not x then -- 不是位置
+      x, y, z = YcCacheHelper.getPosition(toobjid)
+      if not x then -- 取不到目标位置数据
+        return
+      end
+      y = y + ActorAPI.getEyeHeight(toobjid)
+    end
+    local x0, y0, z0 = YcCacheHelper.getPosition(objid)
+    if not x0 then -- 取不到执行者位置数据
+      return
+    end
+    y0 = y0 + ActorAPI.getEyeHeight(objid)
+    local myVector3 = YcVector3:new(x0, y0, z0, x, y, z) -- 视线方向
+    if ActorAPI.isPlayer(objid) and needRotateCamera then -- 如果执行者是三维视角玩家
+      local faceYaw, facePitch
+      if y == y0 then
+        facePitch = 0
+      else
+        facePitch = YcVectorHelper.getActorFacePitch(myVector3)
+      end
+      if x ~= x0 or z ~= z0 then -- 不在同一竖直位置上
+        -- faceYaw = MathHelper.getPlayerFaceYaw(myVector3)
+        local player = YcPlayerManager.getPlayer(objid)
+        faceYaw = YcVectorHelper.getActorFaceYaw(myVector3) - player.yawDiff
+      else -- 在同一竖直位置上
+        faceYaw = ActorAPI.getFaceYaw(objid)
+        -- if y0 < y then -- 向上
+        --   facePitch = -90
+        -- elseif y0 > y then -- 向下
+        --   facePitch = 90
+        -- else -- 水平
+        --   facePitch = 0
+        -- end
+      end
+      PlayerAPI.rotateCamera(objid, faceYaw, facePitch)
+    else -- 执行者是生物或二维视角玩家
+      local facePitch
+      if y == y0 then
+        facePitch = 0
+      else
+        facePitch = YcVectorHelper.getActorFacePitch(myVector3)
+      end
+      if x ~= x0 or z ~= z0 then -- 不在同一竖直位置上
+        local faceYaw = YcVectorHelper.getActorFaceYaw(myVector3)
+        ActorAPI.setFaceYaw(objid, faceYaw)
+      else -- 在同一竖直位置上
+        -- if y0 < y then -- 向上
+        --   facePitch = -90
+        -- elseif y0 > y then -- 向下
+        --   facePitch = 90
+        -- else -- 水平
+        --   facePitch = 0
+        -- end
+      end
+      local result = ActorAPI.setFacePitch(objid, facePitch)
+      if not result then
+        YcLogHelper.debug(myVector3)
+      end
+    end
+  else -- 如果执行者是多个（数组）
+    for i, id in ipairs(objid) do
+      YcActorHelper.lookAt(id, toobjid, needRotateCamera)
+    end
+  end
 end

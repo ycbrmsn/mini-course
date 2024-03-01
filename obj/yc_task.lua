@@ -7,8 +7,7 @@ YcTask = YcTable:new({
   TYPE = 'YC_TASK'
 })
 
---- 用于实例化任务的参数
----@class YcTaskParam
+---@class YcTaskParam 用于实例化任务的参数
 ---@field name string 任务名称
 ---@field desc string 任务描述
 ---@field itemid integer 任务书，用于不重置地图时记录玩家任务。即如果有任务书，则表示玩家接受了任务

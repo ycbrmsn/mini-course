@@ -172,11 +172,10 @@ function ActorAPI.removeEnchant(objid, slot, enchantId)
   end, '移除装备附魔', 'objid=', objid, ',slot=', slot, ',enchantId=', enchantId)
 end
 
---[[
-  @param  {integer} objid 对象id
-  @param  {number} yaw 水平角度
-  @return {boolean} 是否成功
-]]
+--- 设置actor原地旋转偏移角度
+---@param objid integer 行为者id
+---@param yaw number 水平角度
+---@return boolean 是否成功
 function ActorAPI.setFaceYaw(objid, yaw)
   return YcApiHelper.callIsSuccessMethod(function()
     return Actor:setFaceYaw(objid, yaw)
@@ -204,11 +203,10 @@ function ActorAPI.turnFaceYaw(objid, offset)
   end, '转动actor横向偏移角度', 'objid=', objid, ',offset=', offset)
 end
 
---[[
-  @param  {integer} objid 对象id
-  @param  {number} pitch 与水平方向的夹角
-  @return {boolean} 是否成功
-]]
+--- 设置actor视角仰望角度
+---@param objid integer 行为者id
+---@param pitch number 与水平方向的夹角
+---@return boolean 是否成功
 function ActorAPI.setFacePitch(objid, pitch)
   return YcApiHelper.callIsSuccessMethod(function()
     return Actor:setFacePitch(objid, pitch)
@@ -225,11 +223,10 @@ function ActorAPI.getFacePitch(objid)
   end, '获取actor视角仰望角度', 'objid=', objid)
 end
 
---[[
-  @param  {integer} objid 对象id
-  @param  {number} offset 转动角度
-  @return {boolean} 是否成功
-]]
+--- 转动actor仰望偏移角度
+---@param objid integer 行为者id
+---@param offset number 转动角度
+---@return boolean 是否成功
 function ActorAPI.turnFacePitch(objid, offset)
   return YcApiHelper.callIsSuccessMethod(function()
     return Actor:turnFacePitch(objid, offset)

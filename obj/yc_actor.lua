@@ -5,7 +5,8 @@
 ---@field nickname string 昵称
 ---@field sightLineDistance number 视线长度
 ---@field visionKeepSeconds number 看不见目标后，仍能保持知晓目标位置几秒钟
----@field actions YcArray<YcAction> 行动
+---@field _actions YcArray<YcAction> 行动
+---@field _currentAction YcAction | nil 当前行动
 ---@field x number x位置
 ---@field y number y位置
 ---@field z number z位置
@@ -38,6 +39,7 @@ YcActor = YcTable:new({
 
 function YcActor:new(o)
   o = o or {}
+  o._actions = YcArray:new()
   self.__index = self
   setmetatable(o, self)
   return o
@@ -131,7 +133,7 @@ end
 ---@vararg YcAction 需要添加的行动
 ---@return YcActor 行为者
 function YcActor:pushActions(...)
-  self.actions:push(...)
+  self._actions:push(...)
   return self
 end
 
@@ -139,20 +141,20 @@ end
 ---@vararg YcAction 需要添加的行动
 ---@return YcActor 行为者
 function YcActor:unshiftActions(...)
-  self.actions:unshift(...)
+  self._actions:unshift(...)
   return self
-end
-
---- 删除最后一个行动
----@return YcAction 删除的行动
-function YcActor:shiftAction()
-  return self.actions:shift()
 end
 
 --- 删除第一个行动
 ---@return YcAction 删除的行动
+function YcActor:shiftAction()
+  return self._actions:shift()
+end
+
+--- 删除最后一个行动
+---@return YcAction 删除的行动
 function YcActor:popAction()
-  return self.actions:pop()
+  return self._actions:pop()
 end
 
 --- 从行动数组中删除行动，向行动数组中插入行动
@@ -161,7 +163,7 @@ end
 ---@vararg YcAction 需要插入的行动
 ---@return YcArray<YcAction> 删除的行动构成的数组
 function YcActor:spliceActions(index, howmany, ...)
-  return self.actions:splice(index, howmany, ...)
+  return self._actions:splice(index, howmany, ...)
 end
 
 --- 获取第几个行动
@@ -169,7 +171,7 @@ end
 ---@return YcAction 行动
 function YcActor:getAction(index)
   index = index or 1 -- 默认第一个行动
-  return self.actions[index]
+  return self._actions[index]
 end
 
 --- 设置第几个行动
@@ -178,12 +180,23 @@ end
 ---@return YcActor 行为者
 function YcActor:setAction(action, index)
   index = index or 1 -- 默认第一个行动
-  self.actions[index] = action
+  self._actions[index] = action
   return self
 end
 
+--- 执行当前行动
 function YcActor:performAction()
-
+  if self._actions:length() then -- 如果有行动
+    local action = self:shiftAction()
+    if action ~= self._currentAction then -- 如果行动不同
+      if self._currentAction then -- 如果当前正在执行行动
+        self._currentAction:stop() -- 停止行动
+      end
+      self._currentAction = action -- 设为当前行动
+      action:start() -- 开始行动
+    end
+  end
+  return self
 end
 
 --- 探测玩家

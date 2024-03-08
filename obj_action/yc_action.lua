@@ -19,6 +19,16 @@ function YcAction:start()
   -- 在具体行动中实现
 end
 
+--- 暂停行动
+function YcAction:pause()
+  -- 在具体行动中实现
+end
+
+--- 恢复行动
+function YcAction:resume()
+  -- 在具体行动中实现
+end
+
 --- 结束行动
 function YcAction:stop()
   -- 在具体行动中实现
@@ -26,5 +36,8 @@ end
 
 --- 开始下一个行动
 function YcAction:runNext()
-  self._actor:performAction() -- 开始下一个行动
+  self._actor:shiftAction() -- 删除第一个行动
+  self._actor._currentAction = nil -- 当前行动置空
+  YcLogHelper.debug('开始下一个行动')
+  self._actor:action() -- 开始下一个行动
 end

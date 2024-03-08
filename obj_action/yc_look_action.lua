@@ -36,7 +36,17 @@ function YcLookAction:start()
   end, self._seconds, nil, callback)
 end
 
+--- 暂停行动
+function YcLookAction:pause()
+  YcTimeHelper.delContinueTask(self._t)
+end
+
+--- 恢复行动
+function YcLookAction:resume()
+  self:start()
+end
+
 --- 结束行动
 function YcLookAction:stop()
-  YcTimeHelper.delContinueTask(self._t)
+  self:pause()
 end

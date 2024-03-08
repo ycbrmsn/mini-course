@@ -184,19 +184,57 @@ function YcActor:setAction(action, index)
   return self
 end
 
---- 执行当前行动
-function YcActor:performAction()
+--- 清空行动
+---@return YcActor 行为者
+function YcActor:clearActions()
+  self._actions = YcArray:new()
+  return self
+end
+
+--- 执行行动
+function YcActor:action()
   if self._actions:length() then -- 如果有行动
-    local action = self:shiftAction()
-    if action ~= self._currentAction then -- 如果行动不同
-      if self._currentAction then -- 如果当前正在执行行动
-        self._currentAction:stop() -- 停止行动
+    local action = self._actions[1] -- 取第一个行动
+    if action ~= self._currentAction then -- 如果此行动与当前行动不同
+      if self._currentAction then -- 如果有当前正在执行的行动
+        YcLogHelper.debug('暂停当前行动')
+        self._currentAction:pause() -- 暂停当前行动
       end
-      self._currentAction = action -- 设为当前行动
-      action:start() -- 开始行动
+      self._currentAction = action -- 重置当前行动
+      action:resume() -- 恢复行动
     end
   end
   return self
+end
+
+--- 暂停当前行动，添加一些新行动优先执行
+---@vararg YcAction 需要添加的行动
+function YcActor:pauseToAction(...)
+  self:unshiftActions(...) -- 头部添加行动
+  self:action() -- 执行行动
+end
+
+--- 停止当前行动，添加一些新行动优先执行
+---@vararg YcAction 需要添加的行动
+function YcActor:stopToAction(...)
+  if self._currentAction then -- 如果当前行动正在执行
+    self._currentAction:stop() -- 停止当前行动
+    self._currentAction = nil -- 移除当前行动
+  end
+  self:spliceActions(1, 1, ...) -- 删除第一个行动，并插入行动
+  self:action() -- 执行行动
+end
+
+--- 停止当前行动并清空行动，重新添加一些行动执行
+---@vararg YcAction 需要添加的行动
+function YcActor:clearToAction(...)
+  if self._currentAction then -- 如果当前行动正在执行
+    self._currentAction:stop() -- 停止当前行动
+    self._currentAction = nil -- 移除当前行动
+  end
+  self:clearActions() -- 清空行动
+  self:pushActions(...) -- 添加行动
+  self:action() -- 执行行动
 end
 
 --- 探测玩家

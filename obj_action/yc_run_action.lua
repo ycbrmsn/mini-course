@@ -9,7 +9,14 @@
 ---@field _total integer 已经移动的次数
 ---@field _t string | number 类型
 ---@field _areaid integer 区域id
-YcRunAction = YcAction:new()
+---@field _x number 行为者所在位置x
+---@field _y number 行为者所在位置y
+---@field _z number 行为者所在位置z
+---@field _seconds integer 在同一个位置停留的时长
+---@field TIMEOUT number 超时时长。在原地几秒没动表示超时
+YcRunAction = YcAction:new({
+  TIMEOUT = 5 -- 5秒没动则为超时
+})
 
 --- 实例化一个奔跑行为
 ---@param actor YcActor 行为者
@@ -26,7 +33,8 @@ function YcRunAction:new(actor, positions, dir, count)
     _index = 1,
     _dir = dir,
     _count = count,
-    _total = 0
+    _total = 0,
+    _seconds = 0
   }
   self.__index = self
   setmetatable(o, self)
@@ -36,6 +44,9 @@ end
 --- 开始行动
 function YcRunAction:start()
   CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
+  self._index = 1
+  self._total = 0
+  self._seconds = 0
   if self._positions then -- 如果有位置信息
     self:_run()
   end
@@ -47,20 +58,57 @@ function YcRunAction:_run()
   if not self._areaid then -- 还没有区域id
     YcActionManager.addRunArea(self)
   end
-  ActorAPI.tryNavigationToPos(self._actor.objid, pos.x, pos.y, pos.z)
+  -- 位置取方块的中间，不然可能进入不了区域
+  local x = math.floor(pos.x) + 0.5
+  local y = math.floor(pos.y) + 0.5
+  local z = math.floor(pos.z) + 0.5
+  ActorAPI.tryNavigationToPos(self._actor.objid, x, y, z)
   self._t = YcTimeHelper.newAfterTimeTask(function()
+    YcLogHelper.debug('t: ', self._t)
+    local cx, cy, cz = self._actor:getPosition() -- 当前位置
+    if cx == self._x and cy == self._y and cz == self._z then -- 如果与上次位置相同
+      self._seconds = self._seconds + 1
+      if self._seconds > YcRunAction.TIMEOUT then -- 超时没动
+        self._actor:setPosition(pos) -- 移动到目的地
+      end
+    else -- 位置有所不同
+      self._x, self._y, self._z = cx, cy, cz
+      self._seconds = 0
+    end
     self:_run()
   end)
 end
 
+--- 暂停行动
+function YcRunAction:pause()
+  YcActionManager.delRunArea(self)
+  YcTimeHelper.delAfterTimeTask(self._t) -- 移除任务
+  YcLogHelper.debug('移除任务', self._t)
+  ActorAPI.tryNavigationToPos(self._actor.objid, self._actor:getPosition()) -- 寻路到当前生物位置
+end
+
+--- 恢复行动
+function YcRunAction:resume()
+  if self._index == 0 or self._index == #self._positions + 1 then -- 表示已经结束了
+    self:runNext()
+  else
+    CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
+    self._seconds = 0
+    if self._positions then -- 如果有位置信息
+      self:_run()
+    end
+  end
+end
+
 --- 结束行动
 function YcRunAction:stop()
-  YcTimeHelper.delAfterTimeTask(self._t) -- 移除任务
-  ActorAPI.tryNavigationToPos(self._actor.objid, self._actor:getPosition()) -- 寻路到当前生物位置
+  self:pause()
+  self._index = 0 -- 标记结束
 end
 
 --- 到达位置点区域
 function YcRunAction:onReach()
+  YcLogHelper.debug('onReach')
   if #self._positions == 1 then -- 如果只有一个位置
     self:runNext() -- 开始下一个行动
   else -- 有多个位置

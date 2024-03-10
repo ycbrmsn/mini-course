@@ -29,7 +29,7 @@ function YcAction:resume()
   -- 在具体行动中实现
 end
 
---- 结束行动
+--- 停止行动
 function YcAction:stop()
   -- 在具体行动中实现
 end

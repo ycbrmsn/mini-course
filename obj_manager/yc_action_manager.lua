@@ -3,12 +3,18 @@
 ---@class YcActionManager 行为管理类
 ---@field _runningAction YcTable<integer, YcRunningAction> 区域id -> 奔跑行为
 ---@field RUN_AREA_DIM table{ x: number, y: number, z: number } 奔跑目标位置区域大小
+---@field APPROACH_AREA_DIM table{ x: number, y: number, z: number } 奔跑靠近目标位置区域大小
 YcActionManager = {
   _runningAction = YcTable:new(),
   RUN_AREA_DIM = {
     x = 0,
     y = 0,
     z = 0
+  },
+  APPROACH_AREA_DIM = {
+    x = 1,
+    y = 1,
+    z = 1
   }
 }
 
@@ -16,7 +22,9 @@ YcActionManager = {
 ---@param action YcRunAction 奔跑行为
 function YcActionManager.addRunArea(action)
   local pos = action._positions[action._index] -- 奔跑目标位置
-  local areaid = AreaAPI.createAreaRect(pos, YcActionManager.RUN_AREA_DIM) -- 创建区域
+  -- 靠近创建大区域，奔跑创建小区域
+  local dim = action._isApproach and YcActionManager.APPROACH_AREA_DIM or YcActionManager.RUN_AREA_DIM
+  local areaid = AreaAPI.createAreaRect(pos, dim) -- 创建区域
   YcActionManager._runningAction[areaid] = action -- 记录区域-行为映射
   action._areaid = areaid
 end

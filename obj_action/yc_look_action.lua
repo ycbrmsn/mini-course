@@ -46,7 +46,7 @@ function YcLookAction:resume()
   self:start()
 end
 
---- 结束行动
+--- 停止行动
 function YcLookAction:stop()
   self:pause()
 end

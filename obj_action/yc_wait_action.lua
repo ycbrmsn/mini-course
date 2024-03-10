@@ -39,7 +39,7 @@ function YcWaitAction:resume()
   self:start()
 end
 
---- 结束行动
+--- 停止行动
 function YcWaitAction:stop()
   self:pause()
 end

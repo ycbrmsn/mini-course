@@ -3,10 +3,13 @@
 ---@class YcRunAction : YcAction 奔跑行为
 ---@field _actor YcActor 行为者
 ---@field _positions YcPosition[] 移动位置
----@field _index integer 向第几个位置奔跑
 ---@field _dir 'normal' | 'reverse' | 'alternate' 方向。正向/反向/正反交替
 ---@field _count integer 移动次数。从头到尾或从尾到头共几次
+---@field _waitSeconds integer 一次奔跑结束后如果还有移动次数，那么下次开始前等待的秒数。默认为0
+---@field _isApproach boolean 是否是靠近。如果是靠近，则到达目标方块外一圈位置则算是到达；反之在需要到达目标方块位置
+---@field _index integer 向第几个位置奔跑
 ---@field _total integer 已经移动的次数
+---@field _currentWaitSeconds integer 开始下次奔跑还需要等待的秒数
 ---@field _t string | number 类型
 ---@field _areaid integer 区域id
 ---@field _x number 行为者所在位置x
@@ -18,21 +21,32 @@ YcRunAction = YcAction:new({
   TIMEOUT = 5 -- 5秒没动则为超时
 })
 
+---@class YcRunActionOption 奔跑行为的其他配置信息
+---@param dir 'normal' | 'reverse' | 'alternate' | nil 方向。正向/反向/正反交替。默认正向
+---@param count integer | nil 移动次数。从头到尾或从尾到头共几次。默认1次
+---@param waitSeconds number 下一次奔跑行为开始前等待的秒数。当还有下次移动行为时有效。默认为0。
+---@param isApproach boolean 是否是靠近。如果是靠近，则到达目标方块外一圈位置则算是到达；反之在需要到达目标方块位置
+YcRunActionOption = {}
+
 --- 实例化一个奔跑行为
 ---@param actor YcActor 行为者
 ---@param positions YcPosition[] 移动位置
----@param dir 'normal' | 'reverse' | 'alternate' | nil 方向。正向/反向/正反交替。默认正向
----@param count integer | nil 移动次数。从头到尾或从尾到头共几次。默认1次
+---@param option YcRunActionOption 奔跑行为的其他配置信息
 ---@return YcRunAction 奔跑行为
-function YcRunAction:new(actor, positions, dir, count)
-  dir = dir or 'normal'
-  count = count or 1
+function YcRunAction:new(actor, positions, option)
+  option = option or {}
+  local dir = option.dir or 'normal'
+  local count = option.count or 1
+  local waitSeconds = option.waitSeconds or 0
+  local isApproach = option.isApproach or false
   local o = {
     _actor = actor,
     _positions = positions,
-    _index = 1,
     _dir = dir,
     _count = count,
+    _waitSeconds = waitSeconds,
+    _isApproach = isApproach,
+    _index = 1,
     _total = 0,
     _seconds = 0
   }
@@ -47,6 +61,7 @@ function YcRunAction:start()
   self._index = 1
   self._total = 0
   self._seconds = 0
+  self._currentWaitSeconds = 0
   if self._positions then -- 如果有位置信息
     self:_run()
   end
@@ -54,34 +69,43 @@ end
 
 --- 一次行动
 function YcRunAction:_run()
-  local pos = self._positions[self._index]
-  if not self._areaid then -- 还没有区域id
-    YcActionManager.addRunArea(self)
-  end
-  -- 位置取方块的中间，不然可能进入不了区域
-  local x = math.floor(pos.x) + 0.5
-  local y = math.floor(pos.y) + 0.5
-  local z = math.floor(pos.z) + 0.5
-  ActorAPI.tryNavigationToPos(self._actor.objid, x, y, z)
-  self._t = YcTimeHelper.newAfterTimeTask(function()
-    YcLogHelper.debug('t: ', self._t)
-    local cx, cy, cz = self._actor:getPosition() -- 当前位置
-    if cx == self._x and cy == self._y and cz == self._z then -- 如果与上次位置相同
-      self._seconds = self._seconds + 1
-      if self._seconds > YcRunAction.TIMEOUT then -- 超时没动
-        self._actor:setPosition(pos) -- 移动到目的地
-      end
-    else -- 位置有所不同
-      self._x, self._y, self._z = cx, cy, cz
-      self._seconds = 0
+  if self._currentWaitSeconds > 0 then -- 还有等待时间
+    self._currentWaitSeconds = self._currentWaitSeconds - 1
+    self._t = YcTimeHelper.newAfterTimeTask(function()
+      self:_run()
+    end)
+  else -- 没有等待时间了
+    local pos = self._positions[self._index]
+    if not self._areaid then -- 还没有区域id
+      YcActionManager.addRunArea(self)
     end
-    self:_run()
-  end)
+    -- 位置取方块的中间，不然可能进入不了区域
+    local x = math.floor(pos.x) + 0.5
+    local y = math.floor(pos.y) + 0.5
+    local z = math.floor(pos.z) + 0.5
+    ActorAPI.tryNavigationToPos(self._actor.objid, x, y, z)
+    self._t = YcTimeHelper.newAfterTimeTask(function()
+      YcLogHelper.debug('t: ', self._t)
+      local cx, cy, cz = self._actor:getPosition() -- 当前位置
+      if cx == self._x and cy == self._y and cz == self._z then -- 如果与上次位置相同
+        self._seconds = self._seconds + 1 -- 停留秒数加1
+        if self._seconds > YcRunAction.TIMEOUT then -- 超时没动
+          self._actor:setPosition(pos) -- 直接移动到目的地
+        end
+      else -- 位置有所不同
+        self._x, self._y, self._z = cx, cy, cz
+        self._seconds = 0
+      end
+      self:_run()
+    end)
+  end
 end
 
 --- 暂停行动
 function YcRunAction:pause()
-  YcActionManager.delRunArea(self)
+  if self._areaid then -- 如果有区域id（当在奔跑结束后等待时，是没有区域id的）
+    YcActionManager.delRunArea(self)
+  end
   YcTimeHelper.delAfterTimeTask(self._t) -- 移除任务
   YcLogHelper.debug('移除任务', self._t)
   ActorAPI.tryNavigationToPos(self._actor.objid, self._actor:getPosition()) -- 寻路到当前生物位置
@@ -94,13 +118,14 @@ function YcRunAction:resume()
   else
     CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
     self._seconds = 0
+    self._currentWaitSeconds = 0
     if self._positions then -- 如果有位置信息
       self:_run()
     end
   end
 end
 
---- 结束行动
+--- 停止行动
 function YcRunAction:stop()
   self:pause()
   self._index = 0 -- 标记结束
@@ -139,6 +164,7 @@ function YcRunAction:_checkIndex(isAlternate)
       else -- 继续反向
         self._index = #self._positions
       end
+      self._currentWaitSeconds = self._waitSeconds -- 重置等待时间
       self:_run()
     else -- 没有次数了
       self:runNext() -- 开始下一个行动
@@ -152,6 +178,7 @@ function YcRunAction:_checkIndex(isAlternate)
       else -- 继续正向
         self._index = 1
       end
+      self._currentWaitSeconds = self._waitSeconds -- 重置等待时间
       self:_run()
     else -- 没有次数了
       self:runNext() -- 开始下一个行动

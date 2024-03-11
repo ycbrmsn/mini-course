@@ -76,13 +76,19 @@ ScriptSupportEvent:registerEvent([=[Player.ClickBlock]=], function(event)
   -- action:stop()
 
   -- 测试奔跑行为
-  local pos1 = YcPosition:new(event.x, event.y + 1, event.z)
-  local pos2 = YcPlayerManager.getPlayer(objid):getYcPosition()
-  action = YcRunAction:new(yexiaolong, {pos1, pos2}, {
-    dir = 'alternate',
-    count = 3,
-    waitSeconds = 3,
-    isApproach = true
+  -- local pos1 = YcPosition:new(event.x, event.y + 1, event.z)
+  -- local pos2 = YcPlayerManager.getPlayer(objid):getYcPosition()
+  -- action = YcRunAction:new(yexiaolong, {pos1, pos2}, {
+  --   dir = 'alternate',
+  --   count = 3,
+  --   waitSeconds = 3,
+  --   isApproach = true
+  -- })
+  -- yexiaolong:setAction(action):action()
+
+  -- 测试跟随行为
+  action = YcFollowAction:new(yexiaolong, objid, {
+    noFollowAction = YcLookAction:new(yexiaolong, objid, 3)
   })
   yexiaolong:setAction(action):action()
 end)

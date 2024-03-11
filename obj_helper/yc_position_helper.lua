@@ -174,21 +174,43 @@ function YcPositionHelper.getTowardsDistancePositions(pos1, pos2, distance, tota
 end
 
 --- 获取两点之间的距离
----@param pos1 table{ x: number, y: number, z: number } 第一个点位置
----@param pos2 table{ x: number, y: number, z: number } 第二个点位置
----@return number 距离
-function YcPositionHelper.getDistance(pos1, pos2)
-  local vec3 = YcVector3:new(pos1, pos2)
-  return vec3:length()
+---@param x1 number
+---@param y1 number
+---@param z1 number
+---@param x2 number
+---@param y2 number
+---@param z2 number
+---@return number | nil 距离。nil表示参数不合法
+---------重载---------
+---@overload fun(t: table) : number | nil -> (t.x, t.y, tz)
+---@overload fun(t1: table, t2: table) : number | nil -> (t2.x - t1.x, t2.y - t1.y, t2.z - t1.z)
+---@overload fun(x: number, y: number, z: number) : number | nil -> (x, y, z)
+function YcPositionHelper.getDistance(x1, y1, z1, x2, y2, z2)
+  local vec3 = YcVector3:new(x1, y1, z1, x2, y2, z2)
+  if vec3 then
+    return vec3:length()
+  else
+    return nil
+  end
 end
 
 --- 获取两点水平方向上的距离
----@param pos1 table{ x: number, y: number, z: number } 第一个点位置
----@param pos2 table{ x: number, y: number, z: number } 第二个点位置
----@return number 距离
-function YcPositionHelper.getHorizontalDistance(pos1, pos2)
-  local vec2 = YcVector2:new(pos1.x, pos1.z, pos2.x, pos2.z)
-  return vec2:length()
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@return number | nil 距离。nil表示参数不合法
+---------重载---------
+---@overload fun(t: table) : number | nil -> (t.x, t.y)
+---@overload fun(t1: table, t2: table) : number | nil -> (t2.x - t1.x, t2.y - t1.y)
+---@overload fun(x: number, y: number) : number | nil -> (x, y)
+function YcPositionHelper.getHorizontalDistance(x1, y1, x2, y2)
+  local vec2 = YcVector2:new(x1, y1, x2, y2)
+  if vec2 then
+    return vec2:length()
+  else
+    return nil
+  end
 end
 
 --- 获取矩形区域起止点位置

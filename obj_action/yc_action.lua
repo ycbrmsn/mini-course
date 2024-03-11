@@ -36,8 +36,10 @@ end
 
 --- 开始下一个行动
 function YcAction:runNext()
-  self._actor:shiftAction() -- 删除第一个行动
-  self._actor._currentAction = nil -- 当前行动置空
-  YcLogHelper.debug('开始下一个行动')
-  self._actor:action() -- 开始下一个行动
+  if self == self._actor:getAction() then -- 如果当前行动就是第一个行动
+    self._actor:shiftAction() -- 删除第一个行动
+    self._actor._currentAction = nil -- 当前行动置空
+    YcLogHelper.debug('开始下一个行动')
+    self._actor:action() -- 开始下一个行动
+  end
 end

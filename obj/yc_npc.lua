@@ -1,7 +1,6 @@
 --- NPC类 v1.0.0
 --- created by 莫小仙 on 2023-12-18
 ---@class YcNpc : YcActor NPC
----@field defaultSpeed number 默认速度
 ---@field ableClicked boolean 是否能够被（同组）玩家点击
 ---@field ableDetectPlayer boolean 是否能够探测玩家
 ---@field ableDetectNpc boolean 是否能够探测NPC
@@ -12,7 +11,6 @@
 ---@field freeInAreaId integer | nil 自由活动区域id
 ---@field isInited boolean 是否初始化完成
 YcNpc = YcActor:new({
-  defaultSpeed = 300,
   ableClicked = true,
   ableDetectPlayer = false,
   ableDetectNpc = false,

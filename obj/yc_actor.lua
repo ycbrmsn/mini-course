@@ -3,6 +3,7 @@
 ---@class YcActor 行为者
 ---@field objid integer 行为者id
 ---@field nickname string 昵称
+---@field defaultSpeed number 默认速度
 ---@field sightLineDistance number 视线长度
 ---@field visionKeepSeconds number 看不见目标后，仍能保持知晓目标位置几秒钟
 ---@field _actions YcArray<YcAction> 行动
@@ -12,6 +13,7 @@
 ---@field z number z位置
 YcActor = YcTable:new({
   TYPE = 'YC_ACTOR',
+  defaultSpeed = 300,
   sightLineDistance = 10,
   visionKeepSeconds = 3
 })

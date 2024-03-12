@@ -83,7 +83,7 @@ function YcRunAction:_run()
     local x = math.floor(pos.x) + 0.5
     local y = math.floor(pos.y) + 0.5
     local z = math.floor(pos.z) + 0.5
-    ActorAPI.tryNavigationToPos(self._actor.objid, x, y, z)
+    ActorAPI.tryMoveToPos(self._actor.objid, x, y, z, self._actor.defaultSpeed)
     self._t = YcTimeHelper.newAfterTimeTask(function()
       YcLogHelper.debug('t: ', self._t)
       local cx, cy, cz = self._actor:getPosition() -- 当前位置
@@ -106,9 +106,11 @@ function YcRunAction:pause()
   if self._areaid then -- 如果有区域id（当在奔跑结束后等待时，是没有区域id的）
     YcActionManager.delRunArea(self)
   end
-  YcTimeHelper.delAfterTimeTask(self._t) -- 移除任务
-  YcLogHelper.debug('移除任务', self._t)
-  ActorAPI.tryNavigationToPos(self._actor.objid, self._actor:getPosition()) -- 寻路到当前生物位置
+  if self._t then
+    YcTimeHelper.delAfterTimeTask(self._t) -- 移除任务
+    self._t = nil
+  end
+  ActorAPI.tryMoveToPos(self._actor.objid, self._actor:getPosition(), self._actor.defaultSpeed) -- 寻路到当前生物位置
 end
 
 --- 恢复行动

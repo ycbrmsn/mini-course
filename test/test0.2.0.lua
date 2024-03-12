@@ -87,8 +87,18 @@ ScriptSupportEvent:registerEvent([=[Player.ClickBlock]=], function(event)
   -- yexiaolong:setAction(action):action()
 
   -- 测试跟随行为
-  action = YcFollowAction:new(yexiaolong, objid, {
-    noFollowAction = YcLookAction:new(yexiaolong, objid, 3)
-  })
+  -- action = YcFollowAction:new(yexiaolong, objid, {
+  --   noFollowAction = YcLookAction:new(yexiaolong, objid, 3)
+  -- })
+  -- yexiaolong:setAction(action):action()
+
+  -- 测试自由活动行为
+  -- action = YcFreeAction:new(yexiaolong)
+  -- yexiaolong:setAction(action):action()
+
+  -- 测试区域内自由活动行为
+  local pos = yexiaolong:getYcPosition()
+  local pos2 = YcPosition:new(pos.x + 5, pos.y, pos.z + 5)
+  action = YcFreeAreaAction:new(yexiaolong, {pos, pos2})
   yexiaolong:setAction(action):action()
 end)

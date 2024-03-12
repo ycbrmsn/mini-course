@@ -25,6 +25,7 @@ end
 
 --- 开始行动
 function YcActAction:start()
+  CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
   ActorAPI.playAct(self._actor.objid, self._actid)
   self._t = YcTimeHelper.newAfterTimeTask(function()
     self:runNext() -- 开始下一个行动
@@ -33,7 +34,10 @@ end
 
 --- 暂停行动
 function YcActAction:pause()
-  YcTimeHelper.delAfterTimeTask(self._t)
+  if self._t then
+    YcTimeHelper.delAfterTimeTask(self._t)
+    self._t = nil
+  end
 end
 
 --- 恢复行动

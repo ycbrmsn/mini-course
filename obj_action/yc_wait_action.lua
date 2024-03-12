@@ -31,7 +31,10 @@ end
 
 --- 暂停行动
 function YcWaitAction:pause()
-  YcTimeHelper.delAfterTimeTask(self._t)
+  if self._t then
+    YcTimeHelper.delAfterTimeTask(self._t)
+    self._t = nil
+  end
 end
 
 --- 恢复行动

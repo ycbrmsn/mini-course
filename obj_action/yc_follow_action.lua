@@ -46,6 +46,7 @@ end
 
 --- 开始行动
 function YcFollowAction:start()
+  CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
   self._isFollowing = true
   self._isFoundTarget = true
   self._isFoundSelf = false
@@ -63,7 +64,7 @@ function YcFollowAction:_run()
       self._isFoundSelf = true -- 标记找到了自己
       if self._isFollowing then -- 如果正在跟随
         if distance > self._minDistance then -- 如果超过最小距离
-          ActorAPI.tryNavigationToPos(self._actor.objid, tx, ty, tz)
+          ActorAPI.tryMoveToPos(self._actor.objid, tx, ty, tz, self._actor.defaultSpeed)
         else -- 如果进入合适距离
           self._isFollowing = false -- 标记没有跟随
           if self._noFollowAction then
@@ -74,7 +75,7 @@ function YcFollowAction:_run()
         if distance > self._maxDistance then -- 如果超过最大距离
           self:_tryPauseNoFollowAction()
           self._isFollowing = true -- 标记在跟随
-          ActorAPI.tryNavigationToPos(self._actor.objid, tx, ty, tz)
+          ActorAPI.tryMoveToPos(self._actor.objid, tx, ty, tz, self._actor.defaultSpeed)
         else -- 如果没有超过最大距离
           -- 继续做自己的事。这里不处理
         end

@@ -241,9 +241,9 @@ function YcPositionHelper.getBlockPositionsBetweenTwoPositions(pos1, pos2)
   -- 循环找出所有中间方块
   while true do
     -- 判断当前哪个方向上更快进入下一个方格
-    local tx, bx = YcPositionHelper.getReachBoundaryTime(currPos, vecNormal, 'x')
-    local ty, by = YcPositionHelper.getReachBoundaryTime(currPos, vecNormal, 'y')
-    local tz, bz = YcPositionHelper.getReachBoundaryTime(currPos, vecNormal, 'z')
+    local tx, bx = YcPositionHelper._getReachBoundaryTime(currPos, vecNormal, 'x')
+    local ty, by = YcPositionHelper._getReachBoundaryTime(currPos, vecNormal, 'y')
+    local tz, bz = YcPositionHelper._getReachBoundaryTime(currPos, vecNormal, 'z')
     -- 将三个分量放入数组
     local arr = YcArray:new()
     arr:push(YcTable:new({
@@ -303,7 +303,7 @@ function YcPositionHelper.getBlockPositionsBetweenTwoPositions(pos1, pos2)
   return blockPosList
 end
 
-function YcPositionHelper.getReachBoundaryTime(pos, speed, coordinate)
+function YcPositionHelper._getReachBoundaryTime(pos, speed, coordinate)
   local boundary -- 最近边界
   if speed[coordinate] > 0 then -- x方向上在增加
     boundary = math.floor(pos[coordinate] + 1)
@@ -316,4 +316,36 @@ function YcPositionHelper.getReachBoundaryTime(pos, speed, coordinate)
   else -- x方向上不变
     return 9999 -- 这里用9999表示无穷大。因为这里的时间最小值（三个方向速度相等时）不会大于根号三，所以任意大于根号三的值都行
   end
+end
+
+--- 在一个位置附近找一个随机位置
+---@param x number 位置的x
+---@param y number 位置的y
+---@param z number 位置的z
+---@param r number 半径
+---@return number 随机位置的x
+---@return number 随机位置的y
+---@return number 随机位置的z
+function YcPositionHelper.getRandomPosAroundPos(x, y, z, r)
+  local r1 = math.random() * r * 2
+  local r2 = math.random() * r * 2
+  local r3 = math.random() * r * 2
+  return x - r + r1, y - r + r2, z - r + r3
+end
+
+--- 在两个位置之间找一个随机位置
+---@param x1 number 位置1的x
+---@param y1 number 位置1的y
+---@param z1 number 位置1的z
+---@param x2 number 位置2的x
+---@param y2 number 位置2的y
+---@param z2 number 位置2的z
+---@return number 随机位置的x
+---@return number 随机位置的y
+---@return number 随机位置的z
+function YcPositionHelper.getRandomPosByRange(x1, y1, z1, x2, y2, z2)
+  local offsetX = math.random() * (x2 - x1)
+  local offsetY = math.random() * (y2 - y1)
+  local offsetZ = math.random() * (z2 - z1)
+  return x1 + offsetX, y1 + offsetY, z1 + offsetZ
 end

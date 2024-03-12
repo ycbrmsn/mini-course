@@ -38,7 +38,10 @@ end
 
 --- 暂停行动
 function YcLookAction:pause()
-  YcTimeHelper.delContinueTask(self._t)
+  if self._t then
+    YcTimeHelper.delContinueTask(self._t)
+    self._t = nil
+  end
 end
 
 --- 恢复行动

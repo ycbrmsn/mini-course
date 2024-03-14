@@ -11,7 +11,12 @@
 ---@field _isFoundTarget boolean 是否找到目标
 ---@field _isFoundSelf boolean 是否找到了自己
 ---@field _t string | number 类型
-YcFollowAction = YcAction:new()
+---@field _isPaused boolean 是否是暂停
+---@field _group YcActionGroup | nil 所属行为组
+---@field NAME string 行为名称
+YcFollowAction = YcAction:new({
+  NAME = 'follow'
+})
 
 ---@class YcFollowActionOption 跟随行为的其他配置信息
 ---@field maxDistance number | nil 最大活动范围。超过该范围将进入跟随状态。默认为6米
@@ -37,7 +42,8 @@ function YcFollowAction:new(actor, toobjid, option)
     _maxDistance = maxDistance,
     _minDistance = minDistance,
     _noFollowAction = noFollowAction,
-    _noTargetAction = noTargetAction
+    _noTargetAction = noTargetAction,
+    _isPaused = false
   }
   self.__index = self
   setmetatable(o, self)
@@ -47,6 +53,7 @@ end
 --- 开始行动
 function YcFollowAction:start()
   CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
+  self._isPaused = false
   self._isFollowing = true
   self._isFoundTarget = true
   self._isFoundSelf = false
@@ -104,6 +111,7 @@ end
 
 --- 暂停行动
 function YcFollowAction:pause()
+  self._isPaused = true -- 标记是暂停
   if self._t then
     YcTimeHelper.delAfterTimeTask(self._t)
     self._t = nil
@@ -118,8 +126,12 @@ function YcFollowAction:resume()
 end
 
 --- 停止行动
-function YcFollowAction:stop()
+---@param isTurnNext boolean | nil 停止行动后是否轮到下一个行动。默认不会
+function YcFollowAction:stop(isTurnNext)
   self:pause()
+  if isTurnNext then
+    self:turnNext()
+  end
 end
 
 function YcFollowAction:_tryPauseNoFollowAction()

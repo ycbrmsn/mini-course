@@ -6,11 +6,17 @@
 ---@field _timeGap number 两次移动的时间间隔
 ---@field _isOpenAI boolean 是否打开AI
 ---@field _t string | number 类型
-YcFreeAreaAction = YcAction:new()
+---@field _isPaused boolean 是否是暂停
+---@field _group YcActionGroup | nil 所属行为组
+---@field NAME string 行为名称
+YcFreeAreaAction = YcAction:new({
+  NAME = 'freeArea'
+})
 
 ---@class YcFreeAreaActionOption 区域内自由活动行为的其他配置信息
----@field timeGap number 两次移动的时间间隔。默认为7秒
----@field isOpenAI boolean 是否打开AI。默认关闭
+---@field timeGap number | nil 两次移动的时间间隔。默认为7秒
+---@field isOpenAI boolean | nil 是否打开AI。默认关闭
+---@field actions table | nil 一次移动结束后
 YcFreeAreaActionOption = {}
 
 --- 实例化一个区域内自动活动行为
@@ -45,6 +51,7 @@ end
 --- 开始行动
 function YcFreeAreaAction:start()
   CreatureAPI.setAIActive(self._actor.objid, self._isOpenAI) -- 修改AI开启状态
+  self._isPaused = false
   self:_run()
 end
 
@@ -66,6 +73,7 @@ end
 
 --- 暂停行动
 function YcFreeAreaAction:pause()
+  self._isPaused = true -- 标记是暂停
   local x, y, z = self._actor:getPosition()
   if x then -- 如果找到位置
     ActorAPI.tryMoveToPos(self._actor.objid, x, y, z, self._actor.defaultSpeed) -- 移动到当前位置
@@ -82,6 +90,10 @@ function YcFreeAreaAction:resume()
 end
 
 --- 停止行动
-function YcFreeAreaAction:stop()
+---@param isTurnNext boolean | nil 停止行动后是否轮到下一个行动。默认不会
+function YcFreeAreaAction:stop(isTurnNext)
   self:pause()
+  if isTurnNext then
+    self:turnNext()
+  end
 end

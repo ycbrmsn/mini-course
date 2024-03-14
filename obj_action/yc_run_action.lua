@@ -16,8 +16,12 @@
 ---@field _y number 行为者所在位置y
 ---@field _z number 行为者所在位置z
 ---@field _seconds integer 在同一个位置停留的时长
+---@field _isPaused boolean 是否是暂停
+---@field _group YcActionGroup | nil 所属行为组
+---@field NAME string 行为名称
 ---@field TIMEOUT number 超时时长。在原地几秒没动表示超时
 YcRunAction = YcAction:new({
+  NAME = 'run',
   TIMEOUT = 5 -- 5秒没动则为超时
 })
 
@@ -103,6 +107,7 @@ end
 
 --- 暂停行动
 function YcRunAction:pause()
+  self._isPaused = true -- 标记是暂停
   if self._areaid then -- 如果有区域id（当在奔跑结束后等待时，是没有区域id的）
     YcActionManager.delRunArea(self)
   end
@@ -128,16 +133,20 @@ function YcRunAction:resume()
 end
 
 --- 停止行动
-function YcRunAction:stop()
+---@param isTurnNext boolean | nil 停止行动后是否轮到下一个行动。默认不会
+function YcRunAction:stop(isTurnNext)
   self:pause()
   self._index = 0 -- 标记结束
+  if isTurnNext then
+    self:turnNext()
+  end
 end
 
 --- 到达位置点区域
 function YcRunAction:onReach()
   YcLogHelper.debug('onReach')
   if #self._positions == 1 then -- 如果只有一个位置
-    self:runNext() -- 开始下一个行动
+    self:turnNext() -- 轮到下一个行动
   else -- 有多个位置
     if self._dir == 'normal' then -- 正向
       self._index = self._index + 1
@@ -169,7 +178,7 @@ function YcRunAction:_checkIndex(isAlternate)
       self._currentWaitSeconds = self._waitSeconds -- 重置等待时间
       self:_run()
     else -- 没有次数了
-      self:runNext() -- 开始下一个行动
+      self:turnNext() -- 轮到下一个行动
     end
   elseif self._index == #self._positions + 1 then -- 正向结束了
     self._total = self._total + 1
@@ -183,7 +192,7 @@ function YcRunAction:_checkIndex(isAlternate)
       self._currentWaitSeconds = self._waitSeconds -- 重置等待时间
       self:_run()
     else -- 没有次数了
-      self:runNext() -- 开始下一个行动
+      self:turnNext() -- 轮到下一个行动
     end
   else -- 还没有结束
     self:_run()

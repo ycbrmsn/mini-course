@@ -2,6 +2,9 @@
 --- created by 莫小仙 on 2023-12-18
 ---@class YcAction 行动
 ---@field _actor YcActor 行为者
+---@field _isPaused boolean 是否是暂停
+---@field _group YcActionGroup | nil 所属行为组
+---@field NAME string 行为名称
 YcAction = {}
 
 --- 实例化一个行动
@@ -30,16 +33,22 @@ function YcAction:resume()
 end
 
 --- 停止行动
-function YcAction:stop()
+---@param isTurnNext boolean | nil 停止行动后是否轮到下一个行动。默认不会
+function YcAction:stop(isTurnNext)
   -- 在具体行动中实现
 end
 
 --- 开始下一个行动
-function YcAction:runNext()
-  if self == self._actor:getAction() then -- 如果当前行动就是第一个行动
-    self._actor:shiftAction() -- 删除第一个行动
-    self._actor._currentAction = nil -- 当前行动置空
-    YcLogHelper.debug('开始下一个行动')
-    self._actor:action() -- 开始下一个行动
+function YcAction:turnNext()
+  if self._group then
+    self._group:turnNext()
+  else
+    YcLogHelper.warn('缺失行为组')
   end
+end
+
+--- 设置所属行为组
+function YcAction:setGroup(group)
+  self._group = group
+  return self
 end

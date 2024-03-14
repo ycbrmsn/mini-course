@@ -6,7 +6,7 @@
 ---@field defaultSpeed number 默认速度
 ---@field sightLineDistance number 视线长度
 ---@field visionKeepSeconds number 看不见目标后，仍能保持知晓目标位置几秒钟
----@field _actions YcArray<YcAction> 行动
+---@field _actionGroup YcActionGroup 行为组
 ---@field _currentAction YcAction | nil 当前行动
 ---@field x number x位置
 ---@field y number y位置
@@ -41,7 +41,7 @@ YcActor = YcTable:new({
 
 function YcActor:new(o)
   o = o or {}
-  o._actions = YcArray:new()
+  o._actionGroup = YcActionGroup:new()
   self.__index = self
   setmetatable(o, self)
   return o
@@ -131,49 +131,35 @@ function YcActor:setNickname(nickname)
   return ActorAPI.setnickname(self.objid, nickname)
 end
 
---- 在行动数组尾部添加一个或多个行动
----@vararg YcAction 需要添加的行动
+--- 在行动数组尾部添加一个或多个行动/行动组
+---@vararg YcAction | YcActionGroup 需要添加的行动/行动组
 ---@return YcActor 行为者
 function YcActor:pushActions(...)
-  self._actions:push(...)
+  self._actionGroup:push(...)
   return self
 end
 
---- 在行动数组头部添加一个或多个行动
----@vararg YcAction 需要添加的行动
+--- 在行动数组尾部添加一个或多个行动/行动组
+---@vararg YcAction | YcActionGroup 需要添加的行动/行动组
 ---@return YcActor 行为者
-function YcActor:unshiftActions(...)
-  self._actions:unshift(...)
+function YcActor:pushTempActions(...)
+  self._actionGroup:unshift(...)
   return self
 end
 
---- 删除第一个行动
----@return YcAction 删除的行动
-function YcActor:shiftAction()
-  return self._actions:shift()
-end
-
---- 删除最后一个行动
----@return YcAction 删除的行动
-function YcActor:popAction()
-  return self._actions:pop()
-end
-
---- 从行动数组中删除行动，向行动数组中插入行动
----@param index integer 位置
----@param howmany integer 删除行动的数量
----@vararg YcAction 需要插入的行动
----@return YcArray<YcAction> 删除的行动构成的数组
-function YcActor:spliceActions(index, howmany, ...)
-  return self._actions:splice(index, howmany, ...)
+--- 清空行动
+---@return YcActor 行为者
+function YcActor:clearActions()
+  self._actionGroup:stop() -- 停止行动
+  self._actionGroup = YcActionGroup:new() -- 重新实例化一个行为组
+  return self
 end
 
 --- 获取第几个行动
 ---@param index integer | nil 序号。默认第一个
 ---@return YcAction 行动
 function YcActor:getAction(index)
-  index = index or 1 -- 默认第一个行动
-  return self._actions[index]
+  return self._actionGroup:get(index)
 end
 
 --- 设置第几个行动
@@ -181,62 +167,42 @@ end
 ---@param index integer | nil 序号。默认第一个
 ---@return YcActor 行为者
 function YcActor:setAction(action, index)
-  index = index or 1 -- 默认第一个行动
-  self._actions[index] = action
+  self._actionGroup:set(action, index)
   return self
 end
 
---- 清空行动
+--- 重新设置行动
+---@vararg YcAction | YcActionGroup 需要添加的行为/行为组
 ---@return YcActor 行为者
-function YcActor:clearActions()
-  self._actions = YcArray:new()
+function YcActor:resetActions(...)
+  self:clearActions()
+  self._actionGroup:push(...)
   return self
 end
 
---- 执行行动
-function YcActor:action()
-  if self._actions:length() then -- 如果有行动
-    local action = self._actions[1] -- 取第一个行动
-    if action ~= self._currentAction then -- 如果此行动与当前行动不同
-      if self._currentAction then -- 如果有当前正在执行的行动
-        YcLogHelper.debug('暂停当前行动')
-        self._currentAction:pause() -- 暂停当前行动
-      end
-      self._currentAction = action -- 重置当前行动
-      action:resume() -- 恢复行动
-    end
-  end
+--- 开始行动
+---@return YcActor 行为者
+function YcActor:startAction()
+  self._actionGroup:start()
   return self
 end
 
---- 暂停当前行动，添加一些新行动优先执行
----@vararg YcAction 需要添加的行动
-function YcActor:pauseToAction(...)
-  self:unshiftActions(...) -- 头部添加行动
-  self:action() -- 执行行动
+--- 添加临时行动。如果当前在执行主行动，则暂停，优先执行临时行动
+---@vararg YcAction | YcActionGroup 需要添加的行动/行动组
+---@return YcActor 行为者
+function YcActor:addTempAction(...)
+  self:pushTempActions(...)
+  self._actionGroup:tryStartTemp()
+  return self
 end
 
---- 停止当前行动，添加一些新行动优先执行
----@vararg YcAction 需要添加的行动
-function YcActor:stopToAction(...)
-  if self._currentAction then -- 如果当前行动正在执行
-    self._currentAction:stop() -- 停止当前行动
-    self._currentAction = nil -- 移除当前行动
+--- 尝试停止行动，然后执行后面的行动
+---@param actionName string 需要停止的行动
+function YcActor:tryStopAction(actionName)
+  local action = YcActionHelper.getCurrentAction(self._actionGroup) -- 获取当前具体行为
+  if action and action.NAME == actionName then -- 如果行为名称相同
+    action:stop(true) -- 停止当前行为，并执行下一个行为
   end
-  self:spliceActions(1, 1, ...) -- 删除第一个行动，并插入行动
-  self:action() -- 执行行动
-end
-
---- 停止当前行动并清空行动，重新添加一些行动执行
----@vararg YcAction 需要添加的行动
-function YcActor:clearToAction(...)
-  if self._currentAction then -- 如果当前行动正在执行
-    self._currentAction:stop() -- 停止当前行动
-    self._currentAction = nil -- 移除当前行动
-  end
-  self:clearActions() -- 清空行动
-  self:pushActions(...) -- 添加行动
-  self:action() -- 执行行动
 end
 
 --- 探测玩家

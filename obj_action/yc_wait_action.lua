@@ -4,7 +4,12 @@
 ---@field _actor YcActor 行为者
 ---@field _seconds number 等待几秒
 ---@field _t number 类型
-YcWaitAction = YcAction:new()
+---@field _isPaused boolean 是否是暂停
+---@field _group YcActionGroup | nil 所属行为组
+---@field NAME string 行为名称
+YcWaitAction = YcAction:new({
+  NAME = 'wait'
+})
 
 --- 实例化一个等待行为
 ---@param actor YcActor 行为者
@@ -25,12 +30,13 @@ end
 function YcWaitAction:start()
   CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
   self._t = YcTimeHelper.newAfterTimeTask(function()
-    self:runNext() -- 开始下一个行动
+    self:turnNext() -- 轮到下一个行动
   end, self._seconds)
 end
 
 --- 暂停行动
 function YcWaitAction:pause()
+  self._isPaused = true -- 标记是暂停
   if self._t then
     YcTimeHelper.delAfterTimeTask(self._t)
     self._t = nil
@@ -43,6 +49,10 @@ function YcWaitAction:resume()
 end
 
 --- 停止行动
-function YcWaitAction:stop()
+---@param isTurnNext boolean | nil 停止行动后是否轮到下一个行动。默认不会
+function YcWaitAction:stop(isTurnNext)
   self:pause()
+  if isTurnNext then
+    self:turnNext()
+  end
 end

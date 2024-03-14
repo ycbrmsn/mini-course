@@ -5,7 +5,12 @@
 ---@field _toobjid integer | YcActor | YcPosition 目标玩家id/生物id 或 目标玩家/生物 或 位置
 ---@field _seconds number 看几秒
 ---@field _t string | number 类型
-YcLookAction = YcAction:new()
+---@field _isPaused boolean 是否是暂停
+---@field _group YcActionGroup | nil 所属行为组
+---@field NAME string 行为名称
+YcLookAction = YcAction:new({
+  NAME = 'look'
+})
 
 --- 实例化一个持续看行为
 ---@param actor YcActor 行为者
@@ -29,7 +34,7 @@ function YcLookAction:start()
   CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
   -- 结束时回调
   local callback = function()
-    self:runNext() -- 开始下一个行动
+    self:turnNext() -- 轮到下一个行动
   end
   self._t = YcTimeHelper.newContinueTask(function()
     self._actor:lookAt(self._toobjid)
@@ -38,6 +43,7 @@ end
 
 --- 暂停行动
 function YcLookAction:pause()
+  self._isPaused = true -- 标记是暂停
   if self._t then
     YcTimeHelper.delContinueTask(self._t)
     self._t = nil
@@ -50,6 +56,10 @@ function YcLookAction:resume()
 end
 
 --- 停止行动
-function YcLookAction:stop()
+---@param isTurnNext boolean | nil 停止行动后是否轮到下一个行动。默认不会
+function YcLookAction:stop(isTurnNext)
   self:pause()
+  if isTurnNext then
+    self:turnNext()
+  end
 end

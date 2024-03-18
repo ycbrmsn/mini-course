@@ -109,6 +109,7 @@ end
 function YcActionGroup:turnNext()
   if self._currentAction then -- 如果有当前行动
     self._currentAction:stop() -- 停止当前行动
+    self._currentAction = nil
   end
   if self._isTempActionRunning then -- 如果正在执行临时行动
     self._tempActions:shift() -- 移除第一个
@@ -119,10 +120,11 @@ function YcActionGroup:turnNext()
       else -- 不是暂停的
         action:start() -- 开始行动
       end
+      self._currentAction = action
     else -- 没有找到行动
       self._isTempActionRunning = false -- 标记不执行临时行动了
       self._index = self._index - 1 -- 因为递归一开始会加1，为了保证序号不变，所以这里减1
-      self:startNext()
+      self:turnNext()
     end
   else -- 在执行主行动
     self._index = self._index + 1 -- 序号递增
@@ -134,9 +136,10 @@ function YcActionGroup:turnNext()
       else -- 不是暂停的
         action:start() -- 开始行动
       end
+      self._currentAction = action
     else -- 没有找到行动，说明没有下一个行动了
       if self._group then -- 如果有所属行为组
-        self._group:startNext() -- 所属行为组开始下一个行动
+        self._group:turnNext() -- 所属行为组开始下一个行动
       else -- 没有所属行为组，那么表示没有后续了
         -- 暂时就什么都不做了
       end
@@ -202,6 +205,9 @@ end
 ---@return YcActionGroup 行为组
 function YcActionGroup:set(action, index)
   index = index or 1
+  if action.setGroup then -- 如果有setGroup方法，我就认为这是一个action或actionGroup
+    action:setGroup(self)
+  end
   ---@type YcAction | YcActionGroup
   local oldAction = self._actions[index] -- 老行动
   if oldAction and oldAction == self._currentAction and not oldAction._isPaused then -- 如果老行动是当前在执行的行动

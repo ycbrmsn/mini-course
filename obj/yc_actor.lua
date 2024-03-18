@@ -143,7 +143,7 @@ end
 ---@vararg YcAction | YcActionGroup 需要添加的行动/行动组
 ---@return YcActor 行为者
 function YcActor:pushTempActions(...)
-  self._actionGroup:unshift(...)
+  self._actionGroup:pushTemp(...)
   return self
 end
 
@@ -196,13 +196,16 @@ function YcActor:addTempAction(...)
   return self
 end
 
---- 尝试停止行动，然后执行后面的行动
+--- 尝试停止指定行动
 ---@param actionName string 需要停止的行动
+---@return boolean 是否成功。如果当前行动不是指定的行动，则不成功
 function YcActor:tryStopAction(actionName)
   local action = YcActionHelper.getCurrentAction(self._actionGroup) -- 获取当前具体行为
   if action and action.NAME == actionName then -- 如果行为名称相同
     action:stop(true) -- 停止当前行为，并执行下一个行为
+    return true
   end
+  return false
 end
 
 --- 探测玩家

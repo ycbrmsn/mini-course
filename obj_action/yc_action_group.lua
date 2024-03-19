@@ -8,6 +8,7 @@
 ---@field _currentAction YcAction | YcActionGroup | nil 当前正在执行的行动/行动组
 ---@field _isPaused boolean 是否是暂停
 ---@field _group YcActionGroup | nil 所属行为组
+---@field _f (fun(): void) | nil 行为组结束后的调用
 ---@field NAME string 行为组名称
 YcActionGroup = {
   NAME = 'group'
@@ -15,7 +16,8 @@ YcActionGroup = {
 
 --- 实例化一个行为组
 ---@param array table | nil 行为/行为组数组
-function YcActionGroup:new(array)
+---@param f (fun(): void) | nil 行为组结束后的调用
+function YcActionGroup:new(array, f)
   local o = {
     _index = 1,
     _actions = YcArray:new(),
@@ -23,7 +25,8 @@ function YcActionGroup:new(array)
     _isTempActionRunning = false,
     _currentAction = nil,
     _isPaused = false,
-    _group = nil
+    _group = nil,
+    _f = f
   }
   if type(array) == 'table' then
     for i, action in ipairs(array) do
@@ -101,14 +104,13 @@ function YcActionGroup:stop(isTurnNext)
     YcLogHelper.warn('停止行为组失败：没有行动')
   end
   if isTurnNext then
-    self:turnNext()
+    self:_turnNext()
   end
 end
 
 --- 轮到下一个行动
-function YcActionGroup:turnNext()
+function YcActionGroup:_turnNext()
   if self._currentAction then -- 如果有当前行动
-    self._currentAction:stop() -- 停止当前行动
     self._currentAction = nil
   end
   if self._isTempActionRunning then -- 如果正在执行临时行动
@@ -124,7 +126,7 @@ function YcActionGroup:turnNext()
     else -- 没有找到行动
       self._isTempActionRunning = false -- 标记不执行临时行动了
       self._index = self._index - 1 -- 因为递归一开始会加1，为了保证序号不变，所以这里减1
-      self:turnNext()
+      self:_turnNext()
     end
   else -- 在执行主行动
     self._index = self._index + 1 -- 序号递增
@@ -139,9 +141,11 @@ function YcActionGroup:turnNext()
       self._currentAction = action
     else -- 没有找到行动，说明没有下一个行动了
       if self._group then -- 如果有所属行为组
-        self._group:turnNext() -- 所属行为组开始下一个行动
+        self._group:_turnNext() -- 所属行为组开始下一个行动
       else -- 没有所属行为组，那么表示没有后续了
-        -- 暂时就什么都不做了
+        if type(self._f) == 'function' then -- 如果回调是一个函数
+          self._f()
+        end
       end
     end
   end

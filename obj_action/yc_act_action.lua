@@ -7,8 +7,31 @@
 ---@field _isPaused boolean 是否是暂停
 ---@field _group YcActionGroup | nil 所属行为组
 ---@field NAME string 行为名称
+---@field ACT table<string, integer> 动作字典
 YcActAction = YcAction:new({
-  NAME = 'act'
+  NAME = 'act',
+  ACT = {
+    GREET = 1, -- 打招呼
+    THINK = 2, -- 低头思考
+    CRY = 3, -- 哭泣
+    ANGRY = 4, -- 生气
+    STRETCH = 5, -- 伸懒腰
+    HAPPY = 6, -- 高兴
+    THANK = 7, -- 感谢
+    FREE = 8, -- 休闲动作
+    FALL = 9, -- 倒地
+    POSS = 10, -- 摆姿势
+    STAND = 11, -- 站立
+    RUN = 12, -- 跑
+    SLEEP = 13, -- 躺下睡觉
+    SIT = 14, -- 坐下
+    SWIM = 15, -- 游泳
+    ATTACK = 16, -- 攻击
+    DIE = 17, -- 死亡
+    FRIGHTEN = 18, -- 受惊
+    FREE2 = 19, -- 休闲
+    JUMP = 20 -- 跳
+  }
 })
 
 --- 实例化一个动作行为
@@ -35,7 +58,7 @@ function YcActAction:start()
   self._isPaused = false
   ActorAPI.playAct(self._actor.objid, self._actid)
   self._t = YcTimeHelper.newAfterTimeTask(function()
-    self:turnNext() -- 轮到下一个行动
+    self:_turnNext() -- 轮到下一个行动
   end, self._seconds)
 end
 
@@ -58,6 +81,6 @@ end
 function YcActAction:stop(isTurnNext)
   self:pause()
   if isTurnNext then
-    self:turnNext()
+    self:_turnNext()
   end
 end

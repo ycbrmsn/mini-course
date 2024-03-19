@@ -60,7 +60,8 @@ ScriptSupportEvent:registerEvent([=[Player.ClickActor]=], function(event)
   -- YcLogHelper.debug(ActorAPI.turnFacePitch(toobjid, 10))
 
   -- 测试暂停做行为
-  yexiaolong:pauseToAction(YcLookAction:new(yexiaolong, objid, 3))
+  yexiaolong:tryStopAction(YcLookAction.NAME)
+  yexiaolong:addTempAction(YcLookAction:new(yexiaolong, objid, 3))
 end)
 
 -- 点击方块
@@ -84,21 +85,23 @@ ScriptSupportEvent:registerEvent([=[Player.ClickBlock]=], function(event)
   --   waitSeconds = 3,
   --   isApproach = true
   -- })
-  -- yexiaolong:setAction(action):action()
+  -- yexiaolong:setAction(action):startAction()
 
   -- 测试跟随行为
   -- action = YcFollowAction:new(yexiaolong, objid, {
   --   noFollowAction = YcLookAction:new(yexiaolong, objid, 3)
   -- })
-  -- yexiaolong:setAction(action):action()
+  -- yexiaolong:setAction(action):startAction()
 
   -- 测试自由活动行为
   -- action = YcFreeAction:new(yexiaolong)
-  -- yexiaolong:setAction(action):action()
+  -- yexiaolong:setAction(action):startAction()
 
   -- 测试区域内自由活动行为
   local pos = yexiaolong:getYcPosition()
   local pos2 = YcPosition:new(pos.x + 5, pos.y, pos.z + 5)
-  action = YcFreeAreaAction:new(yexiaolong, {pos, pos2})
-  yexiaolong:setAction(action):action()
+  action = YcFreeAreaAction:new(yexiaolong, {pos, pos2}, {
+    actions = {YcWaitAction:new(yexiaolong, 1), YcActAction:new(yexiaolong, YcActAction.ACT.ATTACK)}
+  })
+  yexiaolong:setAction(action):startAction()
 end)

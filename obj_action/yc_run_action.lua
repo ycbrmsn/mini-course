@@ -35,7 +35,7 @@ YcRunActionOption = {}
 --- 实例化一个奔跑行为
 ---@param actor YcActor 行为者
 ---@param positions YcPosition[] 移动位置
----@param option YcRunActionOption 奔跑行为的其他配置信息
+---@param option YcRunActionOption | nil 奔跑行为的其他配置信息
 ---@return YcRunAction 奔跑行为
 function YcRunAction:new(actor, positions, option)
   option = option or {}
@@ -115,7 +115,8 @@ function YcRunAction:pause()
     YcTimeHelper.delAfterTimeTask(self._t) -- 移除任务
     self._t = nil
   end
-  ActorAPI.tryMoveToPos(self._actor.objid, self._actor:getPosition(), self._actor.defaultSpeed) -- 寻路到当前生物位置
+  local x, y, z = self._actor:getPosition()
+  ActorAPI.tryMoveToPos(self._actor.objid, x, y, z, self._actor.defaultSpeed) -- 寻路到当前生物位置
 end
 
 --- 恢复行动
@@ -138,7 +139,7 @@ function YcRunAction:stop(isTurnNext)
   self:pause()
   self._index = 0 -- 标记结束
   if isTurnNext then
-    self:turnNext()
+    self:_turnNext()
   end
 end
 
@@ -146,7 +147,7 @@ end
 function YcRunAction:onReach()
   YcLogHelper.debug('onReach')
   if #self._positions == 1 then -- 如果只有一个位置
-    self:turnNext() -- 轮到下一个行动
+    self:_turnNext() -- 轮到下一个行动
   else -- 有多个位置
     if self._dir == 'normal' then -- 正向
       self._index = self._index + 1
@@ -178,7 +179,7 @@ function YcRunAction:_checkIndex(isAlternate)
       self._currentWaitSeconds = self._waitSeconds -- 重置等待时间
       self:_run()
     else -- 没有次数了
-      self:turnNext() -- 轮到下一个行动
+      self:_turnNext() -- 轮到下一个行动
     end
   elseif self._index == #self._positions + 1 then -- 正向结束了
     self._total = self._total + 1
@@ -192,7 +193,7 @@ function YcRunAction:_checkIndex(isAlternate)
       self._currentWaitSeconds = self._waitSeconds -- 重置等待时间
       self:_run()
     else -- 没有次数了
-      self:turnNext() -- 轮到下一个行动
+      self:_turnNext() -- 轮到下一个行动
     end
   else -- 还没有结束
     self:_run()

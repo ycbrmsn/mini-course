@@ -39,9 +39,9 @@ function YcAction:stop(isTurnNext)
 end
 
 --- 开始下一个行动
-function YcAction:turnNext()
-  if self._group then
-    self._group:turnNext()
+function YcAction:_turnNext()
+  if self._group then -- 如果有所属行为组
+    self._group:_turnNext() -- 开始行为组里的下一个
   else
     YcLogHelper.warn('缺失行为组')
   end

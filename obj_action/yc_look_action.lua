@@ -34,7 +34,7 @@ function YcLookAction:start()
   CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
   -- 结束时回调
   local callback = function()
-    self:turnNext() -- 轮到下一个行动
+    self:_turnNext() -- 轮到下一个行动
   end
   self._t = YcTimeHelper.newContinueTask(function()
     self._actor:lookAt(self._toobjid)
@@ -60,6 +60,6 @@ end
 function YcLookAction:stop(isTurnNext)
   self:pause()
   if isTurnNext then
-    self:turnNext()
+    self:_turnNext()
   end
 end

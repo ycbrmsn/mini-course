@@ -30,7 +30,7 @@ end
 function YcWaitAction:start()
   CreatureAPI.setAIActive(self._actor.objid, false) -- 停止AI
   self._t = YcTimeHelper.newAfterTimeTask(function()
-    self:turnNext() -- 轮到下一个行动
+    self:_turnNext() -- 轮到下一个行动
   end, self._seconds)
 end
 
@@ -53,6 +53,6 @@ end
 function YcWaitAction:stop(isTurnNext)
   self:pause()
   if isTurnNext then
-    self:turnNext()
+    self:_turnNext()
   end
 end

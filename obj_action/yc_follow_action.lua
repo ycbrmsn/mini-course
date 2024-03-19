@@ -130,7 +130,7 @@ end
 function YcFollowAction:stop(isTurnNext)
   self:pause()
   if isTurnNext then
-    self:turnNext()
+    self:_turnNext()
   end
 end
 

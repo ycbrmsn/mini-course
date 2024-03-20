@@ -19,7 +19,10 @@ YcTimeHelper = {
     t = {},
     frame = {}
   },
-  _continueTaskInfo = {} -- { { f = f, t = t, frames = frames }, ... }
+  _continueTaskInfo = {}, -- { { f = f, t = t, frames = frames }, ... }
+  -- 空函数
+  EMPTY_FUN = function()
+  end
 }
 
 --- 获取下一个序数
@@ -96,7 +99,7 @@ function YcTimeHelper.delAfterTimeTask(t, frame)
     if tasks then -- 该帧有任务数组
       for i = #tasks, 1, -1 do -- 倒序遍历任务
         if tasks[i] and tasks[i].t == t then -- 类型相同
-          YcTimeHelper._afterTimeTaskInfo[frame][i] = nil -- 删除任务
+          YcTimeHelper._afterTimeTaskInfo[frame][i].f = YcTimeHelper.EMPTY_FUN -- 替换掉原函数（表示删除任务）
         end
       end
     end
